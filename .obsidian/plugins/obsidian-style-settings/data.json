@@ -1,6 +1,14 @@
 {
-  "encore-settings@@theme-dark": "encore-theme-dark-cobalt",
+  "encore-settings@@theme-dark": "encore-theme-dark-slate",
+  "encore-settings@@colors": "encore-colors-neutral",
+  "encore-settings@@encore-translucency": true,
+  "encore-settings@@encore-translucency-background": "encore-bg-image",
+  "encore-settings@@encore-translucency-image": "url(\"https://i.imgur.com/tWOKJx1.jpeg\")",
+  "encore-settings@@encore-translucency-strength": 0.15,
+  "encore-settings@@encore-mobile-oled-mode": true,
   "encore-settings@@encore-bright-accent": false,
-  "encore-settings@@theme-light": "encore-theme-light-sterling",
-  "encore-settings@@encore-translucency": false
+  "encore-settings@@encore-disable-grain": false,
+  "encore-settings@@encore-no-makemd": false,
+  "encore-settings@@encore-disable-logo-on-hr": false,
+  "encore-settings@@encore-disable-clickability-fix": false
 }
