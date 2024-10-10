@@ -2,7 +2,9 @@
 
 from map import rooms
 import string
+
 # import re
+
 
 def remove_punct(text):
     """This function is used to remove all punctuation
@@ -17,11 +19,13 @@ def remove_punct(text):
     >>> remove_punct(",go!So.?uTh")
     'goSouTh'
     """
+    # text = text.translate(str.maketrans("", "", string.punctuation))
     for char in text:
         if char in string.punctuation:
             text = text.replace(char, "")
 
     return text
+
 
 def remove_spaces(text):
     """This function is used to remove leading and trailing spaces from a string.
@@ -39,21 +43,28 @@ def remove_spaces(text):
     >>> remove_spaces("   ")
     ''
     """
-    if text == "":
-        return text
-
+    # Find the index of the first non-whitespace character.
     for i, char in enumerate(text):
         if char not in string.whitespace:
             break
+    else:
+        # Prevent i from being Unbound, return empty if all whitespace.
+        # `else` in a `for` loop is executed if it exits cleanly (no `break`s)
+        return ""
 
-    if i != 0:
-        text = text[i:]
+    # Remove leading spaces
+    text = text[i:]
 
+    # Find the index of the first non-whitespace character from the end.
     for i, char in enumerate(reversed(text)):
         if char not in string.whitespace:
             break
+    else:
+        return ""
 
-    if i != 0:
+    # If i is 0, there are no trailing spaces, this would result in [:0] which is an empty string
+    if i > 0:
+        # Remove trailing spaces
         text = text[:-i]
 
     return text
@@ -80,7 +91,7 @@ def normalise_input(user_input):
 
     # Remove leading and trailing spaces
     user_input = remove_spaces(user_input)
-    
+
     # Convert to lower case
     for char in user_input:
         if char in string.ascii_uppercase:
@@ -89,6 +100,7 @@ def normalise_input(user_input):
             user_input = user_input.replace(char, lower)
 
     return user_input
+
 
 def display_room(room):
     """This function takes a room as an input and nicely displays its name
@@ -117,7 +129,7 @@ def display_room(room):
     print(description)
     print()
 
-    
+
 def exit_leads_to(exits, direction):
     """This function takes a dictionary of exits and a direction (a particular
     exit taken from this dictionary). It returns the name of the room into which
@@ -133,6 +145,7 @@ def exit_leads_to(exits, direction):
     room = exits[direction]
     name = rooms[room]["name"]
     return name
+
 
 def print_menu_line(direction, leads_to):
     """This function prints a line of a menu of exits. It takes two strings: a
@@ -166,7 +179,7 @@ def print_menu(exits):
     Where do you want to go?
     """
     print("You can:")
-    
+
     # COMPLETE THIS PART:
     # Iterate over available exits:
     #     and for each exit print the appropriate menu line
@@ -209,7 +222,7 @@ def menu(exits):
     # Repeat until the player enter a valid choice
     while True:
         # COMPLETE THIS PART:
-        
+
         # Display menu
         print_menu(exits)
 
@@ -219,10 +232,8 @@ def menu(exits):
         # Normalise the input
 
         # Check if the input makes sense (is valid exit)
-            # If so, return the player's choice
+        # If so, return the player's choice
         return user_input
-
-
 
 
 def move(exits, direction):
