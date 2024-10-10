@@ -6,7 +6,6 @@ from items import *
 from gameparser import *
 
 
-
 def list_of_items(items):
     """This function takes a list of items (see items.py for the definition) and
     returns a comma-separated list of item names (as a string). For example:
@@ -24,7 +23,7 @@ def list_of_items(items):
     'money, a student handbook, laptop'
 
     """
-    pass
+    return ", ".join([item["name"] for item in items])
 
 
 def print_room_items(room):
@@ -49,7 +48,10 @@ def print_room_items(room):
     Note: <BLANKLINE> here means that doctest should expect a blank line.
 
     """
-    pass
+    items = list_of_items(room["items"])
+
+    if items:
+        print("There is " + items + " here.\n")
 
 
 def print_inventory_items(items):
@@ -62,7 +64,10 @@ def print_inventory_items(items):
     <BLANKLINE>
 
     """
-    pass
+    items = list_of_items(items)
+
+    if items:
+        print("You have " + items + ".\n")
 
 
 def print_room(room):
@@ -119,9 +124,9 @@ def print_room(room):
     print(room["description"])
     print()
 
-    #
-    # COMPLETE ME!
-    #
+    # Display room items
+    print_room_items(room)
+
 
 def exit_leads_to(exits, direction):
     """This function takes a dictionary of exits and a direction (a particular
@@ -193,7 +198,14 @@ def print_menu(exits, room_items, inv_items):
     #
     # COMPLETE ME!
     #
-    
+    # Iterate over items in the room
+    for item in room_items:
+        print(f"TAKE {item['id'].upper()} to take {item['name']}.")
+
+    # Iterate over items in the inventory
+    for item in inv_items:
+        print(f"DROP {item['id'].upper()} to drop your {item['name']}.")
+
     print("What do you want to do?")
 
 
@@ -222,7 +234,10 @@ def execute_go(direction):
     (and prints the name of the room into which the player is
     moving). Otherwise, it prints "You cannot go there."
     """
-    pass
+    global current_room
+    new_room = move(current_room["exits"], direction)
+    print(f"You are now in {new_room['name']}.")
+    current_room = new_room
 
 
 def execute_take(item_id):
@@ -231,16 +246,28 @@ def execute_take(item_id):
     there is no such item in the room, this function prints
     "You cannot take that."
     """
-    pass
-    
+    items = [item for item in current_room["items"] if item["id"] == item_id]
+    if not items:
+        print("You cannot take that.")
+    else:
+        inventory.append(items[0])
+        current_room["items"].remove(items[0])
+        print(f"You have taken {items[0]['name']}.")
+
 
 def execute_drop(item_id):
     """This function takes an item_id as an argument and moves this item from the
     player's inventory to list of items in the current room. However, if there is
     no such item in the inventory, this function prints "You cannot drop that."
     """
-    pass
-    
+    items = [item for item in inventory if item["id"] == item_id]
+    if not items:
+        print("You cannot drop that.")
+    else:
+        current_room["items"].append(items[0])
+        inventory.remove(items[0])
+        print(f"You have dropped {items[0]['name']}.")
+
 
 def execute_command(command):
     """This function takes a command (a list of words as returned by
@@ -329,10 +356,8 @@ def main():
         execute_command(command)
 
 
-
 # Are we being run as a script? If so, run main().
 # '__main__' is the name of the scope in which top-level code executes.
 # See https://docs.python.org/3.4/library/__main__.html for explanation
 if __name__ == "__main__":
     main()
-
