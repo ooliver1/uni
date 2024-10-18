@@ -93,13 +93,14 @@ def normalise_input(user_input):
     user_input = remove_spaces(user_input)
 
     # Convert to lower case
+    new_input = user_input
     for char in user_input:
         if char in string.ascii_uppercase:
-            index = user_input.index(char)
+            index = string.ascii_uppercase.index(char)
             lower = string.ascii_lowercase[index]
-            user_input = user_input.replace(char, lower)
+            new_input = new_input.replace(char, lower)
 
-    return user_input
+    return new_input
 
 
 def display_room(room):
