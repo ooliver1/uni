@@ -112,6 +112,8 @@ def remove_punct(text):
     no_punct = ""
     for char in text:
         if char not in string.punctuation:
+            # If character is not a punctuation character,
+            # add it to the new string.
             no_punct = no_punct + char
 
     return no_punct
@@ -145,9 +147,6 @@ def normalise_input(user_input):
     # Remove punctuation and convert to lower case
     no_punct = remove_punct(user_input).lower()
 
-    #
-    # COMPLETE ME!
-    #
     # Split the string into words
     words = no_punct.split()
 

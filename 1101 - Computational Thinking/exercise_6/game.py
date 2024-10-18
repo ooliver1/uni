@@ -246,13 +246,17 @@ def execute_take(item_id):
     there is no such item in the room, this function prints
     "You cannot take that."
     """
+    # Find all items in room with the given id.
     items = [item for item in current_room["items"] if item["id"] == item_id]
+    
+    # If no items were found
     if not items:
         print("You cannot take that.")
     else:
-        inventory.append(items[0])
-        current_room["items"].remove(items[0])
-        print(f"You have taken {items[0]['name']}.")
+        item = items[0]
+        inventory.append(item)
+        current_room["items"].remove(item)
+        print(f"You have taken {item['name']}.")
 
 
 def execute_drop(item_id):
@@ -260,13 +264,17 @@ def execute_drop(item_id):
     player's inventory to list of items in the current room. However, if there is
     no such item in the inventory, this function prints "You cannot drop that."
     """
+    # Find items in inventory with the given id.
     items = [item for item in inventory if item["id"] == item_id]
+
+    # If we do not have that item.
     if not items:
         print("You cannot drop that.")
     else:
-        current_room["items"].append(items[0])
-        inventory.remove(items[0])
-        print(f"You have dropped {items[0]['name']}.")
+        item = items[0]
+        current_room["items"].append(item)
+        inventory.remove(item)
+        print(f"You have dropped {item['name']}.")
 
 
 def execute_command(command):
