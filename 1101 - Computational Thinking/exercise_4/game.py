@@ -95,7 +95,10 @@ def normalise_input(user_input):
     # Convert to lower case
     new_input = user_input
     for char in user_input:
+        # If character is an uppercase character
         if char in string.ascii_uppercase:
+            # Find the position in the alphabet and replace that character
+            # in the new string.
             index = string.ascii_uppercase.index(char)
             lower = string.ascii_lowercase[index]
             new_input = new_input.replace(char, lower)
