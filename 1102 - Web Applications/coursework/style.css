@@ -45,31 +45,69 @@ red: {
 */
 
 :root {
-    font-family: 'Ubuntu', sans-serif;
+  font-family: "Ubuntu", sans-serif;
+  --grey-400: hsl(238, 18%, 35%);
+  --grey-500: hsl(238, 17%, 45%);
+  --purple-900: hsl(262, 90%, 93%);
 }
 
-aside {
-    float: right;
-    padding: .5rem;
-    margin: 1rem;
-    border-radius: .5rem;
-    border: 1px solid hsl(238, 17%, 45%);
+.profile {
+  float: right;
+  padding: 0.5rem;
+  margin: 1rem;
+  border-radius: 0.5rem;
+  background-color: var(--grey-400);
 }
 
 #linus {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    width: 50%;
-    padding: 1rem;
-    margin-bottom: .5rem;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 50%;
+  padding: 1rem;
+  margin-bottom: 0.5rem;
 }
 
 main {
-    max-width: 30rem;
+  max-width: 30rem;
 }
 
 body {
-    max-width: 50rem;
-    margin: 0 auto;
+  max-width: 50rem;
+  margin: 0 auto;
+  background-color: var(--grey-500);
+  color: var(--purple-900);
+}
+
+nav > ul {
+  display: flex;
+  list-style-type: none;
+  padding: 0;
+  max-width: 24rem;
+}
+
+nav > ul > li {
+  padding: .5rem;
+  margin: .5rem;
+  /*grey*/
+  background-color: var(--grey-400);
+  border-radius: 0.5rem;
+}
+
+nav > ul > li > a {
+  color: white;
+  text-decoration: none;
+}
+
+nav > ul > li > a:hover {
+  color: hsl(196, 67%, 80%);
+}
+
+h1 {
+  text-align: center;
+  font-size: 2rem;
+}
+
+h2 {
+  font-size: 1.5rem;
 }
