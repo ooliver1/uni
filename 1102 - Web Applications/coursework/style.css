@@ -46,8 +46,11 @@ red: {
 
 :root {
   font-family: "Ubuntu", sans-serif;
+  scroll-behavior: smooth;
+
   --grey-400: hsl(238, 18%, 35%);
   --grey-500: hsl(238, 17%, 45%);
+  --purple-800: hsl(262, 85%, 79%);
   --purple-900: hsl(262, 90%, 93%);
 }
 
@@ -58,7 +61,6 @@ red: {
   border-radius: 0.5rem;
   background-color: var(--grey-400);
 }
-
 #linus {
   display: block;
   margin-left: auto;
@@ -69,11 +71,11 @@ red: {
 }
 
 main {
-  max-width: 30rem;
-}
-
-body {
   max-width: 50rem;
+  margin: 0 auto;
+  line-height: 1.1;
+}
+body {
   margin: 0 auto;
   background-color: var(--grey-500);
   color: var(--purple-900);
@@ -85,7 +87,6 @@ nav > ul {
   padding: 0;
   max-width: 24rem;
 }
-
 nav > ul > li {
   padding: .5rem;
   margin: .5rem;
@@ -93,12 +94,10 @@ nav > ul > li {
   background-color: var(--grey-400);
   border-radius: 0.5rem;
 }
-
 nav > ul > li > a {
   color: white;
   text-decoration: none;
 }
-
 nav > ul > li > a:hover {
   color: hsl(196, 67%, 80%);
 }
@@ -107,7 +106,36 @@ h1 {
   text-align: center;
   font-size: 2rem;
 }
-
 h2 {
   font-size: 1.5rem;
+}
+
+footer {
+  padding: 1rem;
+  background-color: var(--grey-400);
+  color: white;
+  width: 100%;
+}
+#references-content {
+  width: 50%;
+  padding: 1rem;
+  margin: 0 auto;
+}
+.ref-link {
+  color: var(--purple-800);
+}
+.ref-link:hover {
+  color: var(--purple-900);
+}
+
+.reference {
+  /*superscript, grey*/
+  color: var(--purple-800);
+  font-size: 0.7rem;
+}
+.reference > a {
+  color: inherit;
+}
+.reference > a:hover {
+  color: var(--purple-900);
 }
