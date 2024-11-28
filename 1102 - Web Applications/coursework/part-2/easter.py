@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
+from typing import Literal
 import cgi
 import cgitb
+import datetime
 
 cgitb.enable()
 
 form = cgi.FieldStorage()
-year = form.getvalue("year")
+year = form.getvalue("year", datetime.datetime.now().year)
+format = form.getvalue("format", "verbose")
 
 
 with open("../C1102/part-2/index.html", "r") as f:
@@ -27,10 +30,20 @@ def get_easter(year):
     m = (a + 11 * h + 22 * l) // 451
     month = (h + l - 7 * m + 114) // 31
     day = ((h + l - 7 * m + 114) % 31) + 1
-    return f"{day}/{month}/{year}"
+    return datetime.datetime(year, month, day)
 
 
-html = html.replace("<!-- easter date -->", get_easter(int(year)))
+def format_date(date: datetime.datetime, format: str) -> str:
+    if format == "numerical":
+        return date.strftime("%d/%m/%Y")
+    elif format == "verbose":
+        return date.strftime("%A %d %B %Y")
+    else:
+        return date.strftime("%A %d %B %Y (%d/%m/%Y)")
+
+
+date = get_easter(int(year))
+html = html.replace("<!-- easter date -->", format_date(date, "verbose"))
 print("Content-Type: text/html")
 print()
 print(html)

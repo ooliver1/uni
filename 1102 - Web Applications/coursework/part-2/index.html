@@ -9,9 +9,12 @@
 <body>
   <form method="GET" action="/WilkesO/cgi-bin/easter.py">
     <input type="text" name="year" />
-    <input type="radio" name="format" value="numerical" />
-    <input type="radio" name="format" value="verbose" />
-    <input type="radio" name="format" value="both" />
+    <ul>
+      <li><label for="numerical">Numerical</label><input type="radio" name="numerical"
+          id="numerical"></li>
+      <li><label for="verbose">Verbose</label><input type="radio" name="verbose" id="verbose"></li>
+      <li><label for="both">Both</label><input type="radio" name="both" id="both"></li>
+    </ul>
     <input type="submit" value="Submit" />
   </form>
   <!-- easter date -->
