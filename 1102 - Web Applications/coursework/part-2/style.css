@@ -1,0 +1,60 @@
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  --grey-200: hsl(241, 25%, 14%);
+  --grey-300: hsl(240, 23%, 22%);
+  --grey-400: hsl(238, 18%, 35%);
+  --teal-400: hsl(200, 55%, 41%);
+  --teal-500: hsl(200, 55%, 58%);
+  --teal-700: hsl(197, 55%, 68%);
+  --teal-900: hsl(195, 80%, 90%);
+}
+
+body {
+  font-family: "Ubuntu", sans-serif;
+  background-color: var(--grey-200);
+  color: var(--teal-900);
+  margin: 20px auto;
+  max-width: 400px;
+}
+
+label, input {
+  font-family: inherit;
+  font-size: 100%;
+  padding: 5px;
+  width: 100%;
+  appearance: none;
+}
+
+input[type="text"] {
+  background-color: var(--grey-400);
+  border-radius: 5px;
+  border: 1px solid var(--grey-300);
+  color: white;
+}
+
+input[type="radio"] {
+  position: relative;
+  width: 1em;
+  height: 1em;
+  border: 1px solid var(--grey-300);
+}
+
+input[type="radio"]:checked {
+  background-color: var(--teal-700);
+}
+
+input[type="radio"]:focus {
+  outline: 2px solid var(--teal-500);
+}
+
+input[type="submit"] {
+  background-color: var(--teal-500);
+  border: 1px solid var(--teal-400);
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+}

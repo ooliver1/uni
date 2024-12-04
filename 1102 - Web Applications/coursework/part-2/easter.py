@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-from typing import Literal
 import cgi
 import cgitb
 import datetime
@@ -33,14 +32,27 @@ def get_easter(year):
     return datetime.datetime(year, month, day)
 
 
+def get_subscript(n: int) -> str:
+    if n % 10 == 1:
+        return "<sup>st</sup>"
+    elif n % 10 == 2:
+        return "<sup>nd</sup>"
+    elif n % 10 == 3:
+        return "<sup>rd</sup>"
+    else:
+        return "<sup>th</sup>"
+
 def format_date(date: datetime.datetime, format: str) -> str:
     if format == "numerical":
         return date.strftime("%d/%m/%Y")
-    elif format == "verbose":
-        return date.strftime("%A %d %B %Y")
     else:
-        return date.strftime("%A %d %B %Y (%d/%m/%Y)")
-
+        day = date.day
+        month = date.strftime("%B")
+        year = date.year
+        if format == "verbose":
+            return f"{day}{get_subscript(day)} of {month} {year}"
+        else:
+            return f"{day}{get_subscript(day)} of {month} {year} ({date.strftime('%d/%m/%Y')})"
 
 date = get_easter(int(year))
 html = html.replace("<!-- easter date -->", format_date(date, "verbose"))

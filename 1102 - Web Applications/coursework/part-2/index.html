@@ -4,16 +4,21 @@
 <head>
   <meta charset="UTF-8">
   <title>Document</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Ubuntu&display=swap" rel="stylesheet">
 </head>
 
 <body>
+  <h1>Easter Date Calculator</h1>
   <form method="GET" action="/WilkesO/cgi-bin/easter.py">
-    <input type="text" name="year" />
+    <input type="text" name="year" id="input-year" />
     <ul>
-      <li><label for="numerical">Numerical</label><input type="radio" name="numerical"
+      <li><label for="numerical">Numerical</label><input type="radio" name="format"
           id="numerical"></li>
-      <li><label for="verbose">Verbose</label><input type="radio" name="verbose" id="verbose"></li>
-      <li><label for="both">Both</label><input type="radio" name="both" id="both"></li>
+      <li><label for="verbose">Verbose</label><input type="radio" name="format" id="verbose"></li>
+      <li><label for="both">Both</label><input type="radio" name="format" id="both"></li>
     </ul>
     <input type="submit" value="Submit" />
   </form>
