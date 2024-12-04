@@ -4,10 +4,11 @@
 <head>
   <meta charset="UTF-8">
   <title>Document</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="/WilkesO/C1102/part-2/style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Ubuntu&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 
 <body>
@@ -16,13 +17,15 @@
     <input type="text" name="year" id="input-year" />
     <ul>
       <li><label for="numerical">Numerical</label><input type="radio" name="format"
-          id="numerical"></li>
-      <li><label for="verbose">Verbose</label><input type="radio" name="format" id="verbose"></li>
-      <li><label for="both">Both</label><input type="radio" name="format" id="both"></li>
+          id="numerical" value="numerical"></li>
+      <li><label for="verbose">Verbose</label><input type="radio" name="format" id="verbose" value="verbose"></li>
+      <li><label for="both">Both</label><input type="radio" name="format" id="both" value="both"></li>
     </ul>
     <input type="submit" value="Submit" />
   </form>
-  <!-- easter date -->
+  <div id="easter-date">
+    <!-- easter date -->
+  </div>
 </body>
 
 </html>

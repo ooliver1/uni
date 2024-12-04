@@ -55,7 +55,7 @@ def format_date(date: datetime.datetime, format: str) -> str:
             return f"{day}{get_subscript(day)} of {month} {year} ({date.strftime('%d/%m/%Y')})"
 
 date = get_easter(int(year))
-html = html.replace("<!-- easter date -->", format_date(date, "verbose"))
+html = html.replace("<!-- easter date -->", format_date(date, format=format))
 print("Content-Type: text/html")
 print()
 print(html)

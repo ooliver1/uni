@@ -18,6 +18,14 @@ body {
   color: var(--teal-900);
   margin: 20px auto;
   max-width: 400px;
+  padding: 20px;
+}
+
+#easter-date {
+  margin-top: 20px;
+  background-color: var(--grey-300);
+  border-radius: 5px;
+  padding: 10px;
 }
 
 label, input {
