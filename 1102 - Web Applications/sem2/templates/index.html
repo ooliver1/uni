@@ -1,11 +1,15 @@
 <!DOCTYPE html>
 <html>
+
 <body>
-    <h1>Web development technologies</h1>
-    <ul>
-        {% for tech in technologies %}
-            <li>{{ tech.name }} - {{ tech.taught }}</li>
-        {% endfor %}
-    </ul>
+  <h1>Item Shop</h1>
+  <ul>
+    {% for item in items %}
+    <li>
+      <a href="{{ url_for('single_product', item_id=loop.index0) }}">{{ item.name }} - £{{ numerize(item.price) }}</a>
+    </li>
+    {% endfor %}
+  </ul>
 </body>
+
 </html>

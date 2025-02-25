@@ -1,0 +1,8 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <h1>{{ item.name }}</h1>
+    <p>{{ item.description }}</p>
+    <img src="{{ url_for('static', filename=item.image) }}" alt="{{ item.name }} flag">
+</body>
+</html>
