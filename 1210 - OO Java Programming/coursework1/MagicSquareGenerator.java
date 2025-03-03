@@ -6,50 +6,41 @@ public class MagicSquareGenerator {
         }
 
         int size = Integer.parseInt(args[0]);
+        if (size < 1 || size % 2 == 0) {
+            System.out.println("Size must be a positive odd number.");
+            return;
+        }
+
         int[][] magicSquare = new int[size][size];
 
-        int row = 1;
-        int column = (size + 1) / 2;
+        int row = 0;
+        int column = size / 2;
 
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
-                magicSquare[i][j] = 0;
-            }
-        }
-        magicSquare[row - 1][column - 1] = 1;
-
-        for (int i = 2; i < Math.pow(size, 2); i++) {
-            if (magicSquare[row - 1][column - 1] == 0) {
-                row--; column--;
-            } else {
-                row++;
+        for (int i = 1; i <= size * size; i++) {
+            // Add another size to ensure this is not negative.
+            int newRow = (row - 1 + size) % size;
+            int newColumn = (column + 1) % size;
+            
+            if (magicSquare[newRow][newColumn] != 0) {
+                newRow = (row + 1) % size;
+                newColumn = column;
             }
 
-            if (row == 0) {
-                row = size;
-            }
-            if (column == 0) {
-                column = size;
-            }
-            if (row == size + 1) {
-                row = 1;
-            }
-            if (column == size + 1) {
-                column = 1;
-            }
-
-            System.out.println(row + " " + column);
-            magicSquare[row-1][column-1] = i;
+            magicSquare[row][column] = i;
+            row = newRow;
+            column = newColumn;
         }
 
         System.out.print(display(magicSquare));
     }
 
     private static String display(int[][] magicSquare) {
+        int padding = (int) Math.log10(magicSquare.length * magicSquare.length) + 1;
+
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < magicSquare.length; i++) {
             for (int j = 0; j < magicSquare[i].length; j++) {
-                sb.append(magicSquare[i][j]);
+                sb.append(String.format("%" + padding + "d", magicSquare[i][j]));
                 sb.append(" ");
             }
             sb.append("\n");
