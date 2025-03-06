@@ -33,10 +33,12 @@ public class MagicSquare {
     }
 
     public String format() {
+        int padding = (int) Math.log10(size * size) + 1;
+
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < grid.length; i++) {
             for (int j = 0; j < grid[i].length; j++) {
-                sb.append(grid[i][j]);
+                sb.append(String.format("%" + padding + "d", grid[i][j]));
                 sb.append(" ");
             }
             sb.append("\n");
