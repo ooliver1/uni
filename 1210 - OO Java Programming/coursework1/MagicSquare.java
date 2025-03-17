@@ -4,6 +4,10 @@ public class MagicSquare {
     private int row;
     private int column;
 
+    protected enum Direction {
+        UP, DOWN, LEFT, RIGHT;
+    };
+
     public MagicSquare(int size) {
         this.size = size;
         grid = new int[size][size];
@@ -44,5 +48,82 @@ public class MagicSquare {
             sb.append("\n");
         }
         return sb.toString();
+    }
+
+    public void shuffle() {
+        for (int i = 0; i < size * size; i++) {
+            int row1 = (int) (Math.random() * size);
+            int column1 = (int) (Math.random() * size);
+            int row2 = (int) (Math.random() * size);
+            int column2 = (int) (Math.random() * size);
+
+            int temp = grid[row1][column1];
+            grid[row1][column1] = grid[row2][column2];
+            grid[row2][column2] = temp;
+        }
+    }
+
+    public void swap(int row, int column, Direction direction) {
+        int newRow = row;
+        int newColumn = column;
+
+        switch (direction) {
+            case UP:
+                newRow--;
+                break;
+            case DOWN:
+                newRow++;
+                break;
+            case LEFT:
+                newColumn--;
+                break;
+            case RIGHT:
+                newColumn++;
+                break;
+        }
+
+        if (newRow == -1) {
+            newRow = size - 1;
+        } else if (newRow == size) {
+            newRow = 0;
+        }
+
+        if (newColumn == -1) {
+            newColumn = size - 1;
+        } else if (newColumn == size) {
+            newColumn = 0;
+        }
+
+        int temp = grid[row][column];
+        grid[row][column] = grid[newRow][newColumn];
+        grid[newRow][newColumn] = temp;
+    }
+
+    public boolean isMagic() {
+        int magicNumber = (size * (size * size + 1)) / 2;
+
+        for (int i = 0; i < size; i++) {
+            int rowSum = 0;
+            int columnSum = 0;
+
+            for (int j = 0; j < size; j++) {
+                rowSum += grid[i][j];
+                columnSum += grid[j][i];
+            }
+
+            if (rowSum != magicNumber || columnSum != magicNumber) {
+                return false;
+            }
+        }
+
+        int diagonalSum1 = 0;
+        int diagonalSum2 = 0;
+
+        for (int i = 0; i < size; i++) {
+            diagonalSum1 += grid[i][i];
+            diagonalSum2 += grid[i][size - i - 1];
+        }
+
+        return diagonalSum1 == magicNumber && diagonalSum2 == magicNumber;
     }
 }
