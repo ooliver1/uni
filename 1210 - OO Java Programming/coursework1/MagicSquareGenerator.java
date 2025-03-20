@@ -1,3 +1,6 @@
+/// Run javac *.java to compile all Java files in the directory
+/// Run java MagicSquareGenerator <size> to run the program
+
 import java.util.Scanner;
 
 public class MagicSquareGenerator {
@@ -8,6 +11,20 @@ public class MagicSquareGenerator {
         }
 
         int size = Integer.parseInt(args[0]);
+
+        if (size < 3) {
+            System.out.println("Size must be at least 3.");
+            return;
+        }
+        if (size % 2 == 0) {
+            System.out.println("Size must be odd.");
+            return;
+        }
+        if (size > 15) {
+            System.out.println("Size must be less than or equal to 15.");
+            return;
+        }
+
         MagicSquare magicSquare = new MagicSquare(size);
 
         int swaps = 0;

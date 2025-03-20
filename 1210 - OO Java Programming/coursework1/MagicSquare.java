@@ -17,6 +17,8 @@ public class MagicSquare {
 
         grid[row][column] = 1;
 
+        // Fill the rest of the grid from 2 to n^2, ensuring row and column wrap around
+        // when they go out of bounds.
         for (int i = 2; i <= size * size; i++) {
             int newRow = (row - 1 + size) % size;
             int newColumn = (column - 1 + size) % size;
@@ -37,6 +39,8 @@ public class MagicSquare {
     }
 
     public String format() {
+        // Pad the start of each number with spaces, to meet the largest number
+        // -which is size^2.
         int padding = (int) Math.log10(size * size) + 1;
 
         StringBuilder sb = new StringBuilder();
@@ -52,6 +56,8 @@ public class MagicSquare {
 
     public void shuffle() {
         for (int i = 0; i < size * size; i++) {
+            // Math.random provides a random number between 0 and 1,
+            // so we multiply it by the size to get a random number in-bounds.
             int row1 = (int) (Math.random() * size);
             int column1 = (int) (Math.random() * size);
             int row2 = (int) (Math.random() * size);
@@ -82,6 +88,8 @@ public class MagicSquare {
                 break;
         }
 
+        // Wrap input around to the other side of the grid if it goes out of bounds.
+        // This is more user-friendly than throwing errors constantly.
         if (newRow == -1) {
             newRow = size - 1;
         } else if (newRow == size) {
@@ -102,6 +110,8 @@ public class MagicSquare {
     public boolean isMagic() {
         int magicNumber = (size * (size * size + 1)) / 2;
 
+        // Check each row and column sequentially, and return early if any of them
+        // don't match the magic number.
         for (int i = 0; i < size; i++) {
             int rowSum = 0;
             int columnSum = 0;
