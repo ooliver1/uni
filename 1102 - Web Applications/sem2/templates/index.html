@@ -6,7 +6,13 @@
   <ul>
     {% for item in items %}
     <li>
-      <a href="{{ url_for('single_product', item_id=loop.index0) }}">{{ item.name }} - £{{ numerize(item.price) }}</a>
+      <div class="item">
+        <img width="256" height="128" src=" {{ url_for('static', filename=item.image) }}"
+          alt="{{ item.name }} flag">
+        <a href="{{ url_for('single_product', item_id=loop.index0) }}">{{ item.name }} -
+          £{{ numerize(item.price) }}</a>
+        <button>Add to basket</button>
+      </div>
     </li>
     {% endfor %}
   </ul>
