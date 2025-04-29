@@ -20,6 +20,7 @@ public class MyArrayQueue {
 
     /**
      * Constructor: Sets up an empty queue of specified initial capacity.
+     * 
      * @param capacity
      */
     public MyArrayQueue(int capacity) {
@@ -40,6 +41,7 @@ public class MyArrayQueue {
 
     /**
      * Checks if queue is empty.
+     * 
      * @return true if queue is empty, false otherwise.
      */
     public boolean isEmpty() {
@@ -48,6 +50,7 @@ public class MyArrayQueue {
 
     /**
      * Checks if queue is full.
+     * 
      * @return true if queue is full, false otherwise.
      */
     public boolean isFull() {
@@ -56,6 +59,7 @@ public class MyArrayQueue {
 
     /**
      * Returns the front element of the queue WITHOUT removing it.
+     * 
      * @return front element of queue, or null if the queue is empty.
      */
     public Object peek() {
@@ -73,10 +77,24 @@ public class MyArrayQueue {
      * the queue is full, and if so, double the size of it. However, the newly
      * resized queue should move the front element to index zero, and then all
      * other elements accordingly. See lecture/lab materials for details.
+     * 
      * @param theElement
      */
     public void enqueue(Object theElement) {
-        // your code here
+        if (isFull()) {
+            // Create a new array, copy each element starting at index 0.
+            Object[] newQueue = new Object[queue.length * 2];
+            for (int i = 0; i < numElements; i++) {
+                newQueue[i] = queue[(front + i) % queue.length];
+            }
+            front = 0;
+            queue = newQueue;
+        }
+
+        // Wrap the end index around if over the queue length.
+        int end = (front + numElements) % queue.length;
+        queue[end] = theElement;
+        numElements++;
     }
 
     /**
@@ -85,15 +103,27 @@ public class MyArrayQueue {
      * Removes an element from the front of the queue and returns it. Should
      * first check whether the queue is empty, and if so, throw an
      * IllegalStateException.
+     * 
      * @return removed element
      * @throws IllegalStateException
      */
     public Object dequeue() throws IllegalStateException {
-        // your code here
+        if (isEmpty()) {
+            throw new IllegalStateException("Queue is empty");
+        }
+
+        Object removedElement = queue[front];
+        queue[front] = null;
+        // Wrap around the front index if over the queue length.
+        front = (front + 1) % queue.length;
+        numElements--;
+
+        return removedElement;
     }
 
     /**
      * Returns the queue as a String. Useful for printing.
+     * 
      * @return String representation of the queue
      */
     public String toString() {
@@ -104,6 +134,7 @@ public class MyArrayQueue {
      * Main method simply tests the queue. You can use this to test your code,
      * or you can create a separate java file that uses the
      * MyArrayQueueCompleted class. But please do not change this method.
+     * 
      * @param args unused.
      */
     public static void main(String[] args) {
