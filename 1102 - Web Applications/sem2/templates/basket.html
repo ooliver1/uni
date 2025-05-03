@@ -1,0 +1,67 @@
+{% extends "./base.html" %}
+{% block title %}Item Shop - Basket{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h1>Basket</h1>
+  <div class="row">
+    {% if items | length > 0 %}
+    {% for item in items %}
+    <div class="col-lg-4 col-md-6 col-sm-8 col-xs-10" style="margin-bottom: 30px;">
+      <div class="well">
+        <img class="img-thumbnail center-block" width="256" height="128"
+          src="{{ url_for('static', filename=item.image) }}" alt="{{ item.name }} flag">
+        <div class="clearfix" style="margin-top: 10px; display: flex; align-items: flex-end;">
+          <div class="pull-left" style="line-height: 34px;">
+            <span>
+              {{ item.name }} - £{{ numerize(item.price) }}
+              <br />
+              {{ item.eco_impact }} Mt CO2e / yr
+            </span>
+          </div>
+          <div class="pull-right" style="margin-left: auto;">
+            <form action="/" method="POST">
+              <input type="hidden" name="remove_item_id" value="{{ item.id }}">
+              <button class="btn btn-danger">Remove from basket</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <p>Your basket is empty.</p>
+    {% endif %}
+  </div>
+  {% if items | length > 0 %}
+  <div class="row">
+    <div class="col-lg-4 col-md-6 col-sm-8 col-xs-10" style="margin-bottom: 30px;">
+      <div class="well">
+        <form action="/" method="POST">
+          <input type="hidden" name="clear_basket" value="true">
+          <button class="btn btn-danger">Clear all items</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+  <div class="row">
+    <div class="col-lg-4 col-md-6 col-sm-8 col-xs-10" style="margin-bottom: 30px;">
+      <div class="well">
+        <h3>Total: £{{ numerize(total_price) }}</h3>
+        <p>Eco Impact: {{ total_eco_impact }} Mt CO2e / yr</p>
+        <form action="/" method="POST">
+          <button class="btn btn-success">Checkout</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-4 col-md-6 col-sm-8 col-xs-10" style="margin-bottom: 30px;">
+      <div class="well">
+        <span class="btn btn-default"><a href="{{ url_for('index') }}">Back to shop</a></span>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

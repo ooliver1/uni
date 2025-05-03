@@ -1,14 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "bootstrap/base.html" %}
+{% block html_attribs %} lang="en"{% endblock %}
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{%block title></title>
-</head>
+{% block metas %}
+{{ super() }}
+<meta charset="UTF-8">
+{% endblock %}
 
-<body>
-
-</body>
-
-</html>
+{% block title %}Item Shop{% endblock %}

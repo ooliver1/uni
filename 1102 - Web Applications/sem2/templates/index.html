@@ -1,21 +1,63 @@
-<!DOCTYPE html>
-<html>
+{% extends "./base.html" %}
 
-<body>
-  <h1>Item Shop</h1>
-  <ul>
+{% block content %}
+<h1>Item Shop</h1>
+<div class="container">
+  <div class="row" style="margin-bottom: 20px; display: flex; align-items: center;">
+    <div class="col-lg-8 col-md-6 col-sm-8 col-xs-10">
+      <form action="/" method="GET" class="form-inline">
+        <label for="sort_by">Sort by:</label>
+        <select name="sort_by" id="sort_by" class="form-control" onchange="this.form.submit()">
+          <option value="default" {% if sort_by == 'default' %}selected{% endif %}>Default</option>
+          <option value="name" {% if sort_by == 'name' %}selected{% endif %}>Name</option>
+          <option value="price" {% if sort_by == 'price' %}selected{% endif %}>Price</option>
+          <option value="eco_impact" {% if sort_by == 'eco_impact' %}selected{% endif %}>Eco Impact
+          </option>
+        </select>
+        <label for="order">Order:</label>
+        <select name="order" id="order" class="form-control" onchange="this.form.submit()">
+          <option value="asc" {% if order == 'asc' %}selected{% endif %}>Ascending</option>
+          <option value="desc" {% if order == 'desc' %}selected{% endif %}>Descending</option>
+        </select>
+      </form>
+    </div>
+    <div class="col-lg-4 col-md-6 col-sm-8 col-xs-10 text-right">
+      <a href="{{ url_for('basket') }}" class="btn btn-info">View Basket</a>
+    </div>
+  </div>
+  <div class="row">
     {% for item in items %}
-    <li>
-      <div class="item">
-        <img width="256" height="128" src=" {{ url_for('static', filename=item.image) }}"
-          alt="{{ item.name }} flag">
-        <a href="{{ url_for('single_product', item_id=loop.index0) }}">{{ item.name }} -
-          £{{ numerize(item.price) }}</a>
-        <button>Add to basket</button>
-      </div>
-    </li>
+    <div class="col-lg-4 col-md-6 col-sm-8 col-xs-10" style="margin-bottom: 30px;">
+      <a href="{{ url_for('single_product', item_id=item.id) }}">
+        <div class="well" style="min-height: 300px;">
+          <img class="img-thumbnail center-block" width="256" height="128"
+            src="{{ url_for('static', filename=item.image) }}" alt="{{ item.name }} flag">
+          <div class="clearfix" style="margin-top: 10px; display: flex; align-items: flex-end;">
+            <div class="pull-left" style="line-height: 34px;">
+              <span>
+                {{ item.name }} - £{{ numerize(item.price) }}
+                <br />
+                {{ item.eco_impact }} Mt CO2e / yr
+              </span>
+            </div>
+            <div class="pull-right" style="margin-left: auto;">
+              {% if item.id in basket %}
+              <form action="/" method="POST">
+                <input type="hidden" name="remove_item_id" value="{{ item.id }}">
+                <button class="btn btn-danger">Remove from basket</button>
+              </form>
+              {% else %}
+              <form action="/" method="POST">
+                <input type="hidden" name="item_id" value="{{ item.id }}">
+                <button class="btn btn-primary">Add to basket</button>
+              </form>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
     {% endfor %}
-  </ul>
-</body>
-
-</html>
+  </div>
+</div>
+{% endblock %}
