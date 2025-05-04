@@ -1,0 +1,87 @@
+{% extends "./base.html" %}
+{% block title %}Country Shop - Checkout{% endblock %}
+
+{% block content %}
+
+{%if error %}
+<div class="alert alert-danger" role="alert">
+  {{ error }}
+</div>
+<div class="container">
+  <h1>Checkout</h1>
+  <div class="row">
+    <div class="col-lg-4 col-md-6 col-sm-8 col-xs-10" style="margin-bottom: 30px;">
+      <div class="well">
+        <span class="btn btn-default"><a href="{{ url_for('index') }}">Back to shop</a></span>
+      </div>
+    </div>
+  </div>
+</div>
+{% elif success %}
+<div class="alert alert-success" role="alert">
+  Success! Your payment has been processed.
+</div>
+<div class="container">
+  <h1>Checkout</h1>
+  <div class="row">
+    <div class="col-lg-4 col-md-6 col-sm-8 col-xs-10" style="margin-bottom: 30px;">
+      <div class="well">
+        <span class="btn btn-default"><a href="{{ url_for('index') }}">Back to shop</a></span>
+      </div>
+    </div>
+  </div>
+</div>
+{% else %}
+<div class="container">
+  <h1>Checkout</h1>
+  <div class="row">
+    <div class="col-lg-4 col-md-6 col-sm-8 col-xs-10" style="margin-bottom: 30px;">
+      <div class="well">
+        <h3>Payment Details</h3>
+        <form action="/checkout" method="POST">
+          <div class="form-group">
+            <label for="card_number">Card Number</label>
+            <input type="text" class="form-control" id="card_number" name="card_number" required>
+          </div>
+          <div class="form-group">
+            <label for="cardholder_name">Cardholder Name</label>
+            <input type="text" class="form-control" id="cardholder_name" name="cardholder_name"
+              required>
+            <div class="form-group">
+              <label for="expiry_date">Expiry Date</label>
+              <input type="text" class="form-control" id="expiry_date" name="expiry_date" required>
+            </div>
+            <div class="form-group">
+              <label for="cvv">CVV</label>
+              <input type="text" class="form-control" id="cvv" name="cvv" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit Payment</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-lg-4 col-md-6 col-sm-8 col-xs-10" style="margin-bottom: 30px;">
+        <div class="well">
+          <h3>Order Summary</h3>
+          <ul>
+            {% for item in items %}
+            <li>{{ item.name }} - £{{ numerize(item.price) }}</li>
+            {% endfor %}
+          </ul>
+          <h4>Total: £{{ numerize(total_price) }}</h4>
+          <p>Eco Impact: {{ total_eco_impact }} Mt CO2e / yr</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-4 col-md-6 col-sm-8 col-xs-10" style="margin-bottom: 30px;">
+      <div class="well">
+        <span class="btn btn-default"><a href="{{ url_for('index') }}">Back to shop</a></span>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

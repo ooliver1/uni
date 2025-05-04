@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Country Shop - {{ item.name }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>{{ item.name }}</h1>
+    <!-- <p>{{ item.description }}</p> -->
+    <!-- <img class="img-thumbnail" src="{{ url_for('static', filename=item.image) }}"
+            alt="{{ item.name }} flag" width="512" height="256"
+            style="display: block; margin-bottom: 20px;"> -->
+    <!-- display description to the right of image -->
+    <div class="row" style="margin-bottom: 20px; display: flex; align-items: center;">
+        <div class="col-lg-6 col-md-6 col-sm-8 col-xs-10">
+            <img class="img-thumbnail" src="{{ url_for('static', filename=item.image) }}"
+                alt="{{ item.name }} flag" width="512" height="256">
+        </div>
+        <div class="col-lg-6 col-md-6 col-sm-8 col-xs-10">
+            <p>Price: £{{ numerize(item.price) }}</p>
+            <p>Eco Impact: {{ item.eco_impact }} Mt CO2e / yr</p>
+            <p>{{ item.description }}</p>
+            {% if in_basket %}
+            <form action="/" method="POST">
+                <input type="hidden" name="remove_item_id" value="{{ item.id }}">
+                <button class="btn btn-danger" style="margin-top: 20px;">Remove from basket</button>
+            </form>
+            {% else %}
+            <form action="/" method="POST">
+                <input type="hidden" name="item_id" value="{{ item.id }}">
+                <button class="btn btn-primary" style="margin-top: 20px;">Add to basket</button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+
+
+    <!-- back to shop-->
+    <div class="row" style="margin-top: 20px;">
+        <div class="col-lg-4 col-md-6 col-sm-8 col-xs-10">
+            <a href="{{ url_for('index') }}" class="btn btn-default">Back to shop</a>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

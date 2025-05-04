@@ -1,6 +1,6 @@
+from calendar import c
 from flask import Flask, render_template, session, request
 from flask_sqlalchemy import SQLAlchemy
-from numerize.numerize import numerize
 from flask_bootstrap import Bootstrap
 
 
@@ -20,6 +20,17 @@ class Product(db.Model):
     eco_impact = db.Column(db.Float())
 
 
+def numerize(n, decimals=2):
+    suffixes = ["", "K", "M", "B", "T"]
+    is_negative = n < 0
+    n = abs(n)
+    for suffix in suffixes:
+        if n < 1000:
+            break
+        n /= 1000
+    return f"{'-' if is_negative else ''}{round(n, decimals)}{suffix}"
+
+
 @app.route("/", methods=["GET", "POST"])
 def index():
     sort_by = request.args.get("sort_by", "default")
@@ -33,6 +44,10 @@ def index():
         items.sort(key=lambda x: x.price, reverse=reverse)
     elif sort_by == "eco_impact":
         items.sort(key=lambda x: x.eco_impact, reverse=reverse)
+
+    search_query = request.args.get("search")
+    if search_query:
+        items = [item for item in items if search_query.lower() in item.name.lower()]
 
     if "basket" not in session:
         session["basket"] = []
@@ -62,6 +77,7 @@ def index():
         basket=basket,
         sort_by=sort_by,
         order=order,
+        search_query=search_query,
     )
 
 
@@ -96,5 +112,71 @@ def basket():
     )
 
 
+@app.route("/checkout", methods=["GET", "POST"])
+def checkout():
+    if request.method == "GET":
+        items = Product.query.all()
+        basket: list[int] = session.get("basket", [])
+        basket_items = [item for item in items if item.id in basket]
+        total_price = sum(item.price for item in basket_items)
+        total_eco_impact = sum(item.eco_impact for item in basket_items)
+        return render_template(
+            "checkout.html",
+            items=basket_items,
+            numerize=numerize,
+            total_price=round(total_price, 2),
+            total_eco_impact=round(total_eco_impact, 2),
+        )
+    else:
+        if not session.get("basket"):
+            return render_template(
+                "checkout.html",
+                error="Basket is empty.",
+            )
+
+        session["basket"] = []
+        session.modified = True
+        # validate form
+        card_number = request.form.get("card_number")
+        expiry_date = request.form.get("expiry_date")
+        cvv = request.form.get("cvv")
+        cardholder_name = request.form.get("cardholder_name")
+        if not card_number or not expiry_date or not cvv or not cardholder_name:
+            return render_template(
+                "checkout.html",
+                error="Please fill in all fields.",
+            )
+
+        card_number = card_number.replace(" ", "").replace("-", "")
+
+        if len(card_number) != 16 or not card_number.isdigit():
+            return render_template(
+                "checkout.html",
+                error="Invalid card number.",
+            )
+        if len(cvv) != 3 or not cvv.isdigit():
+            return render_template(
+                "checkout.html",
+                error="Invalid CVV.",
+            )
+        if len(expiry_date) != 5 or expiry_date[2] != "/":
+            return render_template(
+                "checkout.html",
+                error="Invalid expiry date.",
+            )
+        if not cardholder_name:
+            return render_template(
+                "checkout.html",
+                error="Invalid cardholder name.",
+            )
+
+        # pretend to process payment
+
+        return render_template(
+            "checkout.html",
+            success=True,
+        )
+
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0")
