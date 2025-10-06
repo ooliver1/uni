@@ -83,13 +83,38 @@ public class BookTester {
     public Integer binarySearch(Integer query) {
         return binarySearchImpl(query, 0, records.size() - 1);
     }
+        
+    // implement quicksort
+    protected Integer partition(List<Book> array, int left, int right) {
+        Book pivot = array.get(right);
+        int i = left - 1;
 
+        for (int j = left; j < right; j++) {
+            if (array.get(j).getISBN() <= pivot.getISBN()) {
+                i++;
+
+                Book temp = array.get(i);
+                array.set(i, array.get(j));
+                array.set(j, temp);
+            }
+        }
+
+        Book temp = array.get(i + 1);
+        array.set(i + 1, array.get(right));
+        array.set(right, temp);
+
+        return i + 1;
+    }
     public void quickSort() {
-
+        quickSortImpl(records, 0, records.size() - 1);
     }
 
-    protected Integer partition(List<Book> array, int left, int right) {
-        
+    protected void quickSortImpl(List<Book> array, int left, int right) {
+        if (left < right) {
+            int pivotIndex = partition(array, left, right);
+            quickSortImpl(array, left, pivotIndex - 1);
+            quickSortImpl(array, pivotIndex + 1, right);
+        }
     }
 
     public static void main(String[] args) {
