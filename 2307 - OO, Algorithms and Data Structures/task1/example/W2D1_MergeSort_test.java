@@ -9,7 +9,7 @@ public class W2D1_MergeSort_test {
 
     @BeforeEach
     void setUp() {
-        this.books = W2D1_MergeSort.loadBooksFromCSV("/home/oliver/Documents/pwogwamming/all/uni/2307 - OO, Algorithms and Data Structures/task1/example/books.csv"); // Ensure the file path is correct
+        this.books = W2D1_MergeSort.loadBooksFromCSV("/home/oliver/Documents/pwogwamming/all/uni/2307 - OO, Algorithms and Data Structures/task1/example/p.csv"); // Ensure the file path is correct
     }
 
     @Test
