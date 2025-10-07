@@ -83,8 +83,7 @@ public class BookTester {
     public Integer binarySearch(Integer query) {
         return binarySearchImpl(query, 0, records.size() - 1);
     }
-        
-    // implement quicksort
+
     protected Integer partition(List<Book> array, int left, int right) {
         Book pivot = array.get(right);
         int i = left - 1;
