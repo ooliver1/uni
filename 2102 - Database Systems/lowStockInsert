@@ -1,0 +1,5 @@
+INSERT INTO LowStocks
+(StockNo, StoreCode, Quantity, Reorder, Price)
+SELECT StockNo, StoreCode, Quantity, Reorder, Price
+FROM Stocks
+WHERE Quantity < Reorder;
