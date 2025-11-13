@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS station (
 CREATE INDEX IF NOT EXISTS station_tiploc_ix ON station(tiploc_code);
 
 CREATE TABLE IF NOT EXISTS service (
-	uid CHAR(6) PRIMARY KEY,
+	uid INTEGER PRIMARY KEY,
 	headcode CHAR(4) NOT NULL,
 	operator CHAR(2) NOT NULL,
 	days_run TINYINT NOT NULL,
@@ -34,13 +34,15 @@ CREATE TABLE IF NOT EXISTS service (
 );
 
 CREATE TABLE IF NOT EXISTS service_stop (
-	tiploc_code CHAR(7),
-	service_uid CHAR(6),
+	service_uid INTEGER,
+	position TINYINT,
+	tiploc_code CHAR(7) NOT NULL,
 	platform VARCHAR(3),
-	arrival CHAR(5) NOT NULL,
-	departure CHAR(5) NOT NULL,
-	position TINYINT NOT NULL,
-	PRIMARY KEY (tiploc_code, service_uid),
+	arrival CHAR(5),
+	departure CHAR(5),
+	pass CHAR(5),
+	PRIMARY KEY (service_uid, position),
+	FOREIGN KEY (service_uid) REFERENCES service(uid)
 	FOREIGN KEY (tiploc_code) REFERENCES location(tiploc_code)
 );
 
