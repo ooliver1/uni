@@ -13,6 +13,7 @@ class Location(NamedTuple):
 
 
 locations: list[Location] = []
+raw: list[str] = []
 
 with open(SCHEDULE_FILE, mode="r") as f:
     for line in f:
@@ -33,6 +34,7 @@ with open(SCHEDULE_FILE, mode="r") as f:
             stanox=stanox,
             name=name,
         ))
+        raw.append(line)
 
 
 """
@@ -53,3 +55,6 @@ with open("locations.sql", mode="w") as f:
             f.write(",\n")
         else:
             f.write(";\n")
+
+with open("locations.txt", mode="w") as f:
+    f.writelines(raw)

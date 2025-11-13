@@ -34,6 +34,15 @@ class Service(NamedTuple):
 services: list[Service] = []
 problematic_service = False
 
+valid_locs: set[str] = set()
+with open("locations.sql", mode="r") as f:
+    for line in f:
+        if line.startswith("INSERT INTO location "):
+            continue
+        parts = line.strip().strip(",").strip("();").split(", ")
+        tiploc = parts[0].strip("'").strip()
+        valid_locs.add(tiploc)
+
 with open(SCHEDULE_FILE, mode="r") as f:
     current_service = None
     current_stops = []
@@ -57,8 +66,8 @@ with open(SCHEDULE_FILE, mode="r") as f:
             )
         elif line.startswith("BX") and current_service is not None:
             atoc = line[11:13].strip()
-            if atoc != "AW":
-                # skip non tfw, too many services
+            if atoc not in ("AW", "XC", "GW"):
+                # only one operator
                 current_service = None
                 current_stops = []
                 continue
@@ -67,6 +76,11 @@ with open(SCHEDULE_FILE, mode="r") as f:
             tiploc = line[2:10].strip()
             departure = line[10:15]
             platform = line[19:22].strip() or None
+
+            if tiploc not in valid_locs:
+                # skip invalid locations
+                # print(f"Skipping invalid tiploc {tiploc} in service {current_service.uid if current_service else 'N/A'}")
+                continue
 
             current_stops.append(
                 Stop(
@@ -83,7 +97,12 @@ with open(SCHEDULE_FILE, mode="r") as f:
             arrival = line[10:15]
             departure = line[15:20]
             pass_ = line[20:25]
-            platform = line[24:27].strip() or None
+            platform = line[33:36].strip() or None
+
+            if tiploc not in valid_locs:
+                # skip invalid locations
+                # print(f"Skipping invalid tiploc {tiploc} in service {current_service.uid if current_service else 'N/A'}")
+                continue
 
             current_stops.append(
                 Stop(
@@ -99,6 +118,11 @@ with open(SCHEDULE_FILE, mode="r") as f:
             tiploc = line[2:10].strip()
             arrival = line[10:15]
             platform = line[19:22].strip() or None
+
+            if tiploc not in valid_locs:
+                # skip invalid locations
+                # print(f"Skipping invalid tiploc {tiploc} in service {current_service.uid if current_service else 'N/A'}")
+                continue
 
             current_stops.append(
                 Stop(
@@ -121,7 +145,7 @@ with open(SCHEDULE_FILE, mode="r") as f:
                         stops=current_stops,
                     )
                 # random dupe
-                if hash(s) == 2153149764630793518:
+                if hash(s) == 174062618079953919:
                     if problematic_service:
                         continue
                     problematic_service = True
