@@ -23,6 +23,9 @@ with open(SCHEDULE_FILE, mode="r") as f:
         tiploc = line[2:9]
         print(tiploc)
         stanox = int(line[44:49])
+        if stanox == 0:
+            # skip locations with no stanox, usually bus related
+            continue
         name = line[18:44].strip() or None
 
         locations.append(Location(
@@ -43,7 +46,8 @@ CREATE TABLE IF NOT EXISTS location (
 with open("locations.sql", mode="w") as f:
     f.write("INSERT INTO location (tiploc_code, stanox_code, name) VALUES\n")
     for i, location in enumerate(locations):
-        name_value = f"'{location.name}'" if location.name is not None else "NULL"
+        escaped = location.name.replace("'", "''") if location.name is not None else None
+        name_value = f"'{escaped}'" if location.name is not None else "NULL"
         f.write(f"('{location.tiploc}', {location.stanox}, {name_value})")
         if i < len(locations) - 1:
             f.write(",\n")
