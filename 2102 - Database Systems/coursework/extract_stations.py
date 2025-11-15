@@ -34,7 +34,6 @@ with open(STATION_FILE, mode="r") as f:
             continue
 
         name = line[5:31].strip()
-        print(name)
         tiploc = line[36:43]
         crs = line[49:52]
         ref_east = int(line[52:57])
@@ -56,7 +55,7 @@ with open(STATION_FILE, mode="r") as f:
         #     continue
 
         if tiploc not in valid_tiplocs:
-            print(f"Skipping station with invalid tiploc: {tiploc} ({name})")
+            # print(f"Skipping station with invalid tiploc: {tiploc} ({name})")
             continue
 
         stations.append(Station(
@@ -81,7 +80,10 @@ CREATE TABLE IF NOT EXISTS station (
 with open("stations.sql", mode="w") as f:
     f.write("INSERT INTO station (crs_code, tiploc_code, loc_east, loc_north, name) VALUES\n")
     for i, station in enumerate(stations):
-        escaped = escape(station.name.replace("'", "''"))
+        escaped = station.name.replace("'", "''")
+        if station.name.startswith("A"):
+            # print(name)
+            print(escaped)
         f.write(f"('{station.crs}', '{station.tiploc}', {station.ref_east}, {station.ref_north}, '{escaped}')")
         if i < len(stations) - 1:
             f.write(",\n")

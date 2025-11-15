@@ -75,6 +75,9 @@ with open(SCHEDULE_FILE, mode="r") as f:
         elif line.startswith("LO"):
             tiploc = line[2:10].strip()
             departure = line[10:15]
+            public_departure = line[15:19]
+            if public_departure == "0000":
+                public_departure = None
             platform = line[19:22].strip() or None
 
             if tiploc not in valid_locs:
@@ -86,7 +89,7 @@ with open(SCHEDULE_FILE, mode="r") as f:
                 Stop(
                     tiploc=tiploc,
                     arrival=None,
-                    departure=departure,
+                    departure=public_departure or departure,
                     pass_=None,
                     platform=platform,
                 )
@@ -97,6 +100,12 @@ with open(SCHEDULE_FILE, mode="r") as f:
             arrival = line[10:15]
             departure = line[15:20]
             pass_ = line[20:25]
+            public_arrival = line[25:29]
+            public_departure = line[29:33]
+            if public_arrival == "0000":
+                public_arrival = None
+            if public_departure == "0000":
+                public_departure = None
             platform = line[33:36].strip() or None
 
             if tiploc not in valid_locs:
@@ -107,8 +116,8 @@ with open(SCHEDULE_FILE, mode="r") as f:
             current_stops.append(
                 Stop(
                     tiploc=tiploc,
-                    arrival=arrival if arrival.isalnum() else None,
-                    departure=departure if departure.isalnum() else None,
+                    arrival=public_arrival if public_arrival is not None else arrival if arrival.isalnum() else None,
+                    departure=public_departure if public_departure is not None else departure if departure.isalnum() else None,
                     pass_=pass_ if pass_.isalnum() else None,
                     platform=platform,
                 )
