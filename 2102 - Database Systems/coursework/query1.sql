@@ -24,7 +24,7 @@ FROM service_stop
 JOIN service ON service_stop.service_uid = service.uid
 
 JOIN (
-	SELECT service_uid, MAX(position) last_pos, *
+	SELECT service_uid, MAX(position) last_pos, arrival, tiploc_code
 	FROM service_stop
 	GROUP BY service_uid
 ) as last_stop

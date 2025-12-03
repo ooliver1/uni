@@ -33,6 +33,9 @@ CREATE TABLE IF NOT EXISTS service (
 	FOREIGN KEY (operator) REFERENCES operator(atoc_code)
 );
 
+CREATE INDEX IF NOT EXISTS service_valid_days_ix
+ON service(valid_from, valid_until, days_run);
+
 CREATE TABLE IF NOT EXISTS service_stop (
 	service_uid INTEGER,
 	position TINYINT,
@@ -48,3 +51,5 @@ CREATE TABLE IF NOT EXISTS service_stop (
 
 CREATE INDEX IF NOT EXISTS svcstop_service_uid_ix ON service_stop(service_uid, position);
 CREATE INDEX IF NOT EXISTS svcstop_tiploc_ix ON service_stop(tiploc_code);
+CREATE INDEX IF NOT EXISTS svcstop_tiploc_service_uid_ix
+ON service_stop(tiploc_code, service_uid, position);
