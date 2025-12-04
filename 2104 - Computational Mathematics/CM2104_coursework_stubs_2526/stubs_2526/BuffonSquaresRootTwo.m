@@ -22,7 +22,7 @@ if ~(isnumeric(width) && isnumeric(length) && isnumeric(throws)) || width <= 0 |
     error('width, length and throws must be positive numbers.');
 end
 
-crossings = 0;
+single_crossings = 0;
 consecutive_crossings = 0;
 halfL = length/2;
 
@@ -52,7 +52,7 @@ for i = 1:throws
 
     if any(intersections)
         % event A: any edge crosses a line
-        crossings = crossings + 1;
+        single_crossings = single_crossings + 1;
 
         % event B: same line index for two consecutive edges
         for e = 1:4
@@ -65,11 +65,12 @@ for i = 1:throws
     end
 end
 
-if crossings == 0
+if single_crossings == 0
     r = NaN;
 else
-    r = 2 - (consecutive_crossings) / (crossings);
+    r = 2 - (consecutive_crossings) / (single_crossings);
 end
+crossings = consecutive_crossings;
 
 if nargout < 1
     error('At least one output argument (r) must be requested.');
