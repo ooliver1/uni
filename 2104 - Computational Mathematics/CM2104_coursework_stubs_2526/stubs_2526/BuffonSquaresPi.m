@@ -32,7 +32,7 @@ corners = halfL * [
     -1,  1
     ];
 
-    % used to project between vertices for crossings
+% used to project between vertices for crossings
 edges = [1 2; 2 3; 3 4; 4 1];
 
 % the rotation matrix, as an inline function

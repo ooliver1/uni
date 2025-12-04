@@ -8,11 +8,70 @@
 % r = the estimate of sqrt(2),
 % crossings = the number of needles that cross a plank;
 %
-% NOTE: should you need further input or output variables when integrating 
+% NOTE: should you need further input or output variables when integrating
 % the function to the GUI, you must implement the necessary  checks  using
-% nargin and nargout to  ensure  the  function  works  correctly  outside 
+% nargin and nargout to  ensure  the  function  works  correctly  outside
 % the GUI with the input and output combinations specified above.
 
 function [r,crossings] = BuffonSquaresRootTwo(width,length,throws)
-    
+if nargin < 3
+    error('BuffonSquaresRootTwo requires width, length, and throws.');
+end
+
+if ~(isnumeric(width) && isnumeric(length) && isnumeric(throws)) || width <= 0 || length <= 0 || throws <= 0
+    error('width, length and throws must be positive numbers.');
+end
+
+crossings = 0;
+consecutive_crossings = 0;
+halfL = length/2;
+
+corners = halfL * [
+    -1, -1;
+    1, -1;
+    1,  1;
+    -1,  1
+    ];
+
+% used to project between vertices for crossings
+edges = [1 2; 2 3; 3 4; 4 1];
+
+% the rotation matrix, as an inline function
+R = @(theta) [cos(theta), -sin(theta); sin(theta), cos(theta)];
+
+for i = 1:throws
+    centreX = width * rand();
+    centreY = width * rand();
+    theta = pi*rand();
+
+    rotated = (R(theta) * corners')';
+    pts = rotated + [centreX, centreY];
+    x = pts(:,1);
+
+    intersections = ( floor(x(edges(:,1))/width) ~= floor(x(edges(:,2))/width) );
+
+    if any(intersections)
+        % event A: any edge crosses a line
+        crossings = crossings + 1;
+
+        % event B: same line index for two consecutive edges
+        for e = 1:4
+            e2 = mod(e,4) + 1;
+            if intersections(e) && intersections(e2)
+                consecutive_crossings = consecutive_crossings + 1;
+                break
+            end
+        end
+    end
+end
+
+if crossings == 0
+    r = NaN;
+else
+    r = 2 - (consecutive_crossings) / (crossings);
+end
+
+if nargout < 1
+    error('At least one output argument (r) must be requested.');
+end
 end
