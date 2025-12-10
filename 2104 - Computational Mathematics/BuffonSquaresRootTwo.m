@@ -14,7 +14,7 @@
 % the GUI with the input and output combinations specified above.
 
 function [r, crossings, centreX, centreY, angle, crossing_mask] = BuffonSquaresRootTwo(width, length, throws, planks, plank_length)
-arguments
+arguments (Input)
     width (1,1) {mustBePositive}
     length (1,1) {mustBePositive}
     throws (1,1) {mustBePositive}
@@ -34,19 +34,22 @@ if nargin < 3
     error('BuffonSquaresRootTwo requires width, length, and throws.');
 end
 
+if length * sqrt(2) >= width
+    error('BuffonSquaresRootTwo is only valid when length * sqrt(2) < width')
+end
+
 single_crossings = 0;
 consecutive_crossings = 0;
 crossing_mask = false(throws, 1);
 halfL = length/2;
 
+% Model the corners of a square, and use edge vectors to project between corners
 corners = halfL * [
     -1, -1;
     1, -1;
     1,  1;
     -1,  1
     ];
-
-% used to project between vertices for crossings
 edges = [1 2; 2 3; 3 4; 4 1];
 
 total_width = planks * width;
@@ -54,7 +57,7 @@ centreX = total_width * rand(throws, 1);
 centreY = plank_length * rand(throws, 1);
 angle = pi * rand(throws, 1);
 
-% the rotation matrix, as an inline function
+% The rotation matrix, as an inline function
 R = @(theta) [cos(theta), -sin(theta); sin(theta), cos(theta)];
 
 for i = 1:throws
@@ -63,13 +66,13 @@ for i = 1:throws
     x = pts(:,1);
 
     intersections = ( floor(x(edges(:,1))/width) ~= floor(x(edges(:,2))/width) );
-
+    
     if any(intersections)
-        % event A: any edge crosses a line
+        % event A (N_c): any edge crosses a line
         single_crossings = single_crossings + 1;
         crossing_mask(i) = true;
-
-        % event B: same line index for two consecutive edges
+    
+        % event B (N_cc): same line index for two consecutive edges
         for e = 1:4
             e2 = mod(e,4) + 1;
             if intersections(e) && intersections(e2)
@@ -83,8 +86,11 @@ end
 if single_crossings == 0
     r = NaN;
 else
-    r = 2 - (consecutive_crossings) / (single_crossings);
+    50
 end
+
+% Output N_cc 
+% > `crossings` = the number of cracks (between floorboards) that cross two consecutive sides of a square.
 crossings = consecutive_crossings;
 
 if nargout < 1

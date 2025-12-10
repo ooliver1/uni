@@ -14,7 +14,7 @@
 % the GUI with the input and output combinations specified above.
 
 function [p, crossings, centreX, centreY, angle, crossing_mask] = BuffonSquaresPi(width, length, throws, planks, plank_length)
-arguments
+arguments (Input)
     width (1,1) {mustBePositive}
     length (1,1) {mustBePositive}
     throws (1,1) {mustBePositive}
@@ -34,6 +34,10 @@ if nargin < 3
     error('BuffonSquaresPi requires width, length, and throws.');
 end
 
+if length * sqrt(2) >= width
+    error('BuffonSquaresPi is only valid when length * sqrt(2) < width')
+end
+
 total_width = planks * width;
 centreX = total_width * rand(throws, 1);
 centreY = plank_length * rand(throws, 1);
@@ -44,30 +48,31 @@ crossing_mask = false(throws, 1);
 
 halfL = length / 2;
 
+% Model the corners of a square, and use edge vectors to project between corners
 corners = halfL * [
     -1, -1;
     1, -1;
     1,  1;
     -1,  1
     ];
-
-% used to project between vertices for crossings
 edges = [1 2; 2 3; 3 4; 4 1];
 
-% the rotation matrix, as an inline function
+% The rotation matrix, as an inline function
 R = @(theta) [cos(theta), -sin(theta); sin(theta), cos(theta)];
 
 for i = 1:throws
     rotated = (R(angle(i)) * corners')';
 
     pts = rotated + [centreX(i), centreY(i)];
-    x = pts(:,1);
+    % Only x coord is needed for intersecting
+    x = pts(:, 1);
 
     squareCrossed = false;
 
-    for e = 1:size(edges,1)
-        idx1 = floor(x(edges(e,1))/width);
-        idx2 = floor(x(edges(e,2))/width);
+    for e = 1:size(edges, 1)
+        % Find the plank index of both corners
+        idx1 = floor(x(edges(e, 1)) / width);
+        idx2 = floor(x(edges(e, 2)) / width);
         if idx1 ~= idx2
             crossings = crossings + 1;
             squareCrossed = true;

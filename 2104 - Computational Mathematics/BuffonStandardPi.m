@@ -34,17 +34,22 @@ if nargin < 3
     error('BuffonStandardPi requires width, length, and throws.');
 end
 
+if length >= width
+    error('BuffonStandardPi is only valid when length < width')
+end
+
 total_width = planks * width;
 centreX = total_width * rand(throws, 1);
 centreY = plank_length * rand(throws, 1);
 angle = pi * rand(throws, 1);
-% half-length projection of needle, to find if a needle passes a crack
+% Half-length projection of needle, to find if a needle passes a crack
 proj = (length/2) .* sin(angle);
 
-% find the closest crack, to the left or right
+% Find the closest crack, to the left or right
 offset = mod(centreX, width);
 dist_to_boundary = min(offset, width - offset);
 
+% Crossings_mask is used again in display for different colours
 crossing_mask = proj >= dist_to_boundary;
 crossings = sum(crossing_mask);
 

@@ -1,0 +1,532 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:pPr><w:pStyle w:val="code"/></w:pPr><w:r><w:t><![CDATA[classdef app1 < matlab.apps.AppBase
+
+    % Properties that correspond to app components
+    properties (Access = public)
+        UIFigure                        matlab.ui.Figure
+        GridLayout                      matlab.ui.container.GridLayout
+        LeftPanel                       matlab.ui.container.Panel
+        SimilarColourPicker             matlab.ui.control.ColorPicker
+        IntersectingLabel_3             matlab.ui.control.Label
+        SelectionCountEditField         matlab.ui.control.NumericEditField
+        CountEditField_2Label_2         matlab.ui.control.Label
+        SelectedColourPicker            matlab.ui.control.ColorPicker
+        IntersectingLabel_2             matlab.ui.control.Label
+        SelectionLabel                  matlab.ui.control.Label
+        IntersectingNeedleColourPicker  matlab.ui.control.ColorPicker
+        IntersectingLabel               matlab.ui.control.Label
+        NeedleColourPicker              matlab.ui.control.ColorPicker
+        NeedlesLabel_2                  matlab.ui.control.Label
+        DisplayLabel                    matlab.ui.control.Label
+        ResultTextArea                  matlab.ui.control.TextArea
+        PlankLengthEditField            matlab.ui.control.NumericEditField
+        LengthEditField_2Label          matlab.ui.control.Label
+        RunSimulationButton             matlab.ui.control.Button
+        NeedlesLabel                    matlab.ui.control.Label
+        PlankCountEditField             matlab.ui.control.NumericEditField
+        PlanksLabel                     matlab.ui.control.Label
+        CountEditFieldLabel             matlab.ui.control.Label
+        NeedleCountEditField            matlab.ui.control.NumericEditField
+        CountEditField_2Label           matlab.ui.control.Label
+        NeedleLengthEditField           matlab.ui.control.NumericEditField
+        LengthEditFieldLabel            matlab.ui.control.Label
+        WidthEditField                  matlab.ui.control.NumericEditField
+        WidthEditFieldLabel             matlab.ui.control.Label
+        ProgramDropDown                 matlab.ui.control.DropDown
+        ProgramDropDownLabel            matlab.ui.control.Label
+        RightPanel                      matlab.ui.container.Panel
+        UIAxes                          matlab.ui.control.UIAxes
+    end
+
+    % Properties that correspond to apps with auto-reflow
+    properties (Access = private)
+        onePanelWidth = 576;
+    end
+
+    
+    properties (Access = private)
+        % Store recently processed vectors,
+        % for RunBuffonStandardPi to process selected needles
+        NeedleX1
+        NeedleY1
+        NeedleX2
+        NeedleY2
+        NeedleAngle
+        CrossingMask
+        NeedleLines
+    end
+
+    methods (Access = private)
+        function RunBuffonStandardPi(app)
+            width = app.WidthEditField.Value;
+            length = app.NeedleLengthEditField.Value;
+            throws = app.NeedleCountEditField.Value;
+            planks = app.PlankCountEditField.Value;
+            plank_length = app.PlankLengthEditField.Value;
+
+            [p, crossings, centreX, centreY, angle, crossing_mask] = BuffonStandardPi(width, length, throws, planks, plank_length);
+
+            % Limit needles to at most 1000 for plotting
+            maxPlot = 1000;
+            if throws > maxPlot
+                centreX = centreX(1:maxPlot);
+                centreY = centreY(1:maxPlot);
+                angle = angle(1:maxPlot);
+                throws = 1000;
+            end
+
+            ax = app.UIAxes;
+            cla(ax);
+
+            % Draw plank cracks - width spaced apart
+            lines = 0:width:width*planks;
+            xline(ax, lines);
+            hold(ax, "on");
+
+            halfL = length / 2;
+            
+            dx = halfL * sin(angle);
+            dy = halfL * cos(angle);
+            
+            x1 = centreX + dx;
+            y1 = centreY + dy;
+            
+            x2 = centreX - dx;
+            y2 = centreY - dy;
+
+            % Store for selection logic later
+            app.NeedleX1 = x1;
+            app.NeedleY1 = y1;
+            app.NeedleX2 = x2;
+            app.NeedleY2 = y2;
+            app.NeedleAngle = angle;
+            app.CrossingMask = crossing_mask;
+            app.NeedleLines = gobjects(throws, 1);
+
+            % Store each line separately for independent modification in
+            % selecting
+            for i = 1:throws
+                colour = app.NeedleColourPicker.Value;
+                if crossing_mask(i)
+                    colour = app.IntersectingNeedleColourPicker.Value;
+                end
+                app.NeedleLines(i) = plot(ax, [x1(i), x2(i)], [y1(i), y2(i)], 'Color', colour, 'HitTest', 'off', 'LineWidth', 1);
+            end
+
+            hold(ax, "off");
+
+            app.UIAxes.ButtonDownFcn = @(src, event) app.SelectNeedle(event);
+
+            app.ResultTextArea.Value = sprintf('Estimated π = %.5f\nCrossings = %d', p, crossings);
+        end
+
+        function SelectNeedle(app, event)
+            click = event.IntersectionPoint;
+            cx = click(1); cy = click(2);
+
+            N = length(app.NeedleX1);
+            dist = zeros(N, 1);
+            for i = 1:N
+                x1 = app.NeedleX1(i); y1 = app.NeedleY1(i);
+                x2 = app.NeedleX2(i); y2 = app.NeedleY2(i);
+
+                % Vector along the needle
+                vx = x2 - x1; vy = y2 - y1;
+                % Vector from needle start to click
+                wx = cx - x1; wy = cy - y1;
+
+                % Scalar project click vector onto needle vector
+                % And clamp to [0,1] to stay bounded within the needle
+                % t = dot(w, v) / dot(v, v)
+                t = (vx*wx + vy*wy) / (vx*vx + vy*vy);
+                t = max(0, min(1, t));
+
+                % Find the closest point on the needle to the click
+                px = x1 + t*vx;
+                py = y1 + t*vy;
+
+                % And finally, the distance from that point to the click
+                dist(i) = hypot(cx - px, cy - py);
+            end
+        
+            % The closest needle of all
+            [~, idx] = min(dist);
+        
+            for i = 1:N
+                % Reset color based on crossing
+                if app.CrossingMask(i)
+                    app.NeedleLines(i).Color = app.IntersectingNeedleColourPicker.Value;
+                else
+                    app.NeedleLines(i).Color = app.NeedleColourPicker.Value;
+                end
+                app.NeedleLines(i).LineWidth = 1;
+            end
+        
+            % The selected needle
+            app.NeedleLines(idx).Color = app.SelectedColourPicker.Value;
+            app.NeedleLines(idx).LineWidth = 2;
+        
+            n = app.SelectionCountEditField.Value;
+            current_angle = app.NeedleAngle(idx);
+            other_angles = abs(app.NeedleAngle - current_angle);
+            
+            % Get the closest needles in angle, excluding the most similar
+            % (the already selected needle)
+            [~, order] = sort(other_angles);
+            similar_idx = order(2:n+1);
+        
+            for k = similar_idx
+                app.NeedleLines(k).Color = app.SimilarColourPicker.Value;
+                app.NeedleLines(k).LineWidth = 1.8;
+            end
+        end
+
+        function DisplaySquares(app, centreX, centreY, angle, crossing_mask)
+            width = app.WidthEditField.Value;
+            length = app.NeedleLengthEditField.Value;
+            throws = app.NeedleCountEditField.Value;
+            planks = app.PlankCountEditField.Value;
+
+            % Limit to 1000 for plotting
+            maxPlot = 1000;
+            if throws > maxPlot
+                centreX = centreX(1:maxPlot);
+                centreY = centreY(1:maxPlot);
+                angle = angle(1:maxPlot);
+                throws = 1000;
+            end
+
+            ax = app.UIAxes;
+            cla(ax);
+            hold(ax, "on");
+        
+            lines = 0:width:width*planks;
+            xline(ax, lines);
+        
+            halfL = length/2;
+            corners = halfL * [
+                -1, -1;
+                 1, -1;
+                 1,  1;
+                -1,  1
+            ];
+            
+            % The rotation matrix, as an inline function
+            R = @(theta) [cos(theta), -sin(theta); sin(theta), cos(theta)];
+            
+            for i = 1:throws
+                % Compute square's individual edges again
+                pts = (R(angle(i)) * corners')' + [centreX(i), centreY(i)];
+                x = pts(:,1); y = pts(:,2);
+            
+                xplot = [x; x(1)];
+                yplot = [y; y(1)];
+            
+                if crossing_mask(i)
+                    plot(ax, xplot, yplot, 'Color', app.IntersectingNeedleColourPicker.Value);
+                else
+                    plot(ax, xplot, yplot, 'Color', app.NeedleColourPicker.Value);
+                end
+            end
+        
+            hold(ax, "off");
+        end
+
+        function RunBuffonSquaresPi(app)
+            width = app.WidthEditField.Value;
+            length = app.NeedleLengthEditField.Value;
+            throws = app.NeedleCountEditField.Value;
+            planks = app.PlankCountEditField.Value;
+            plank_length = app.PlankLengthEditField.Value;
+
+            [p, crossings, centreX, centreY, angle, crossing_mask] = BuffonSquaresPi(width, length, throws, planks, plank_length);
+        
+            DisplaySquares(app, centreX, centreY, angle, crossing_mask)
+            app.ResultTextArea.Value = sprintf('Estimated π = %.5f\nCrossings = %d', p, crossings);
+        end
+       
+        function RunBuffonSquaresRootTwo(app)
+            width = app.WidthEditField.Value;
+            length = app.NeedleLengthEditField.Value;
+            throws = app.NeedleCountEditField.Value;
+            planks = app.PlankCountEditField.Value;
+            plank_length = app.PlankLengthEditField.Value;
+
+            [r, crossings, centreX, centreY, angle, crossing_mask] = BuffonSquaresRootTwo(width, length, throws, planks, plank_length);
+
+            DisplaySquares(app, centreX, centreY, angle, crossing_mask)
+            app.ResultTextArea.Value = sprintf('Estimated √2 = %.5f\nCrossings = %d', r, crossings);
+        end
+    end
+    
+
+    % Callbacks that handle component events
+    methods (Access = private)
+
+        % Button pushed function: RunSimulationButton
+        function RunSimulationButtonPushed(app, event)
+            program = app.ProgramDropDown.Value;
+
+            switch program
+                case 'Standard Pi'
+                    RunBuffonStandardPi(app);
+                case 'Squares Pi'
+                    RunBuffonSquaresPi(app);
+                case 'Squares Root 2'
+                    RunBuffonSquaresRootTwo(app);
+                otherwise
+                    error('Unknown program selected.');
+            end
+        end
+
+        % Changes arrangement of the app based on UIFigure width
+        function updateAppLayout(app, event)
+            currentFigureWidth = app.UIFigure.Position(3);
+            if(currentFigureWidth <= app.onePanelWidth)
+                % Change to a 2x1 grid
+                app.GridLayout.RowHeight = {480, 480};
+                app.GridLayout.ColumnWidth = {'1x'};
+                app.RightPanel.Layout.Row = 2;
+                app.RightPanel.Layout.Column = 1;
+            else
+                % Change to a 1x2 grid
+                app.GridLayout.RowHeight = {'1x'};
+                app.GridLayout.ColumnWidth = {220, '1x'};
+                app.RightPanel.Layout.Row = 1;
+                app.RightPanel.Layout.Column = 2;
+            end
+        end
+    end
+
+    % Component initialization
+    methods (Access = private)
+
+        % Create UIFigure and components
+        function createComponents(app)
+
+            % Create UIFigure and hide until all components are created
+            app.UIFigure = uifigure('Visible', 'off');
+            app.UIFigure.AutoResizeChildren = 'off';
+            app.UIFigure.Position = [100 100 640 480];
+            app.UIFigure.Name = 'MATLAB App';
+            app.UIFigure.SizeChangedFcn = createCallbackFcn(app, @updateAppLayout, true);
+
+            % Create GridLayout
+            app.GridLayout = uigridlayout(app.UIFigure);
+            app.GridLayout.ColumnWidth = {220, '1x'};
+            app.GridLayout.RowHeight = {'1x'};
+            app.GridLayout.ColumnSpacing = 0;
+            app.GridLayout.RowSpacing = 0;
+            app.GridLayout.Padding = [0 0 0 0];
+            app.GridLayout.Scrollable = 'on';
+
+            % Create LeftPanel
+            app.LeftPanel = uipanel(app.GridLayout);
+            app.LeftPanel.Layout.Row = 1;
+            app.LeftPanel.Layout.Column = 1;
+
+            % Create ProgramDropDownLabel
+            app.ProgramDropDownLabel = uilabel(app.LeftPanel);
+            app.ProgramDropDownLabel.HorizontalAlignment = 'right';
+            app.ProgramDropDownLabel.Position = [36 437 51 22];
+            app.ProgramDropDownLabel.Text = 'Program';
+
+            % Create ProgramDropDown
+            app.ProgramDropDown = uidropdown(app.LeftPanel);
+            app.ProgramDropDown.Items = {'Standard Pi', 'Squares Pi', 'Squares Root 2'};
+            app.ProgramDropDown.Position = [102 437 100 22];
+            app.ProgramDropDown.Value = 'Standard Pi';
+
+            % Create WidthEditFieldLabel
+            app.WidthEditFieldLabel = uilabel(app.LeftPanel);
+            app.WidthEditFieldLabel.HorizontalAlignment = 'right';
+            app.WidthEditFieldLabel.Position = [50 393 36 22];
+            app.WidthEditFieldLabel.Text = 'Width';
+
+            % Create WidthEditField
+            app.WidthEditField = uieditfield(app.LeftPanel, 'numeric');
+            app.WidthEditField.Limits = [2 50];
+            app.WidthEditField.Position = [101 393 100 22];
+            app.WidthEditField.Value = 10;
+
+            % Create LengthEditFieldLabel
+            app.LengthEditFieldLabel = uilabel(app.LeftPanel);
+            app.LengthEditFieldLabel.HorizontalAlignment = 'right';
+            app.LengthEditFieldLabel.Position = [44 311 42 22];
+            app.LengthEditFieldLabel.Text = 'Length';
+
+            % Create NeedleLengthEditField
+            app.NeedleLengthEditField = uieditfield(app.LeftPanel, 'numeric');
+            app.NeedleLengthEditField.Limits = [1 25];
+            app.NeedleLengthEditField.Position = [101 311 100 22];
+            app.NeedleLengthEditField.Value = 5;
+
+            % Create CountEditField_2Label
+            app.CountEditField_2Label = uilabel(app.LeftPanel);
+            app.CountEditField_2Label.HorizontalAlignment = 'right';
+            app.CountEditField_2Label.Position = [50 292 37 22];
+            app.CountEditField_2Label.Text = 'Count';
+
+            % Create NeedleCountEditField
+            app.NeedleCountEditField = uieditfield(app.LeftPanel, 'numeric');
+            app.NeedleCountEditField.Limits = [1 1000000];
+            app.NeedleCountEditField.Position = [101 292 100 22];
+            app.NeedleCountEditField.Value = 500;
+
+            % Create CountEditFieldLabel
+            app.CountEditFieldLabel = uilabel(app.LeftPanel);
+            app.CountEditFieldLabel.HorizontalAlignment = 'right';
+            app.CountEditFieldLabel.Position = [49 374 37 22];
+            app.CountEditFieldLabel.Text = 'Count';
+
+            % Create PlanksLabel
+            app.PlanksLabel = uilabel(app.LeftPanel);
+            app.PlanksLabel.FontWeight = 'bold';
+            app.PlanksLabel.Position = [7 415 44 22];
+            app.PlanksLabel.Text = 'Planks';
+
+            % Create PlankCountEditField
+            app.PlankCountEditField = uieditfield(app.LeftPanel, 'numeric');
+            app.PlankCountEditField.Limits = [1 10];
+            app.PlankCountEditField.Position = [101 374 100 22];
+            app.PlankCountEditField.Value = 5;
+
+            % Create NeedlesLabel
+            app.NeedlesLabel = uilabel(app.LeftPanel);
+            app.NeedlesLabel.FontWeight = 'bold';
+            app.NeedlesLabel.Position = [7 333 51 22];
+            app.NeedlesLabel.Text = 'Needles';
+
+            % Create RunSimulationButton
+            app.RunSimulationButton = uibutton(app.LeftPanel, 'push');
+            app.RunSimulationButton.ButtonPushedFcn = createCallbackFcn(app, @RunSimulationButtonPushed, true);
+            app.RunSimulationButton.BackgroundColor = [0.0667 0.4431 0.7451];
+            app.RunSimulationButton.Position = [6 96 206 29];
+            app.RunSimulationButton.Text = 'Run Simulation';
+
+            % Create LengthEditField_2Label
+            app.LengthEditField_2Label = uilabel(app.LeftPanel);
+            app.LengthEditField_2Label.HorizontalAlignment = 'right';
+            app.LengthEditField_2Label.Position = [43 355 42 22];
+            app.LengthEditField_2Label.Text = 'Length';
+
+            % Create PlankLengthEditField
+            app.PlankLengthEditField = uieditfield(app.LeftPanel, 'numeric');
+            app.PlankLengthEditField.Limits = [1 500];
+            app.PlankLengthEditField.Position = [101 355 100 22];
+            app.PlankLengthEditField.Value = 50;
+
+            % Create ResultTextArea
+            app.ResultTextArea = uitextarea(app.LeftPanel);
+            app.ResultTextArea.Editable = 'off';
+            app.ResultTextArea.Position = [7 37 206 54];
+
+            % Create DisplayLabel
+            app.DisplayLabel = uilabel(app.LeftPanel);
+            app.DisplayLabel.FontWeight = 'bold';
+            app.DisplayLabel.Position = [7 270 48 22];
+            app.DisplayLabel.Text = 'Display';
+
+            % Create NeedlesLabel_2
+            app.NeedlesLabel_2 = uilabel(app.LeftPanel);
+            app.NeedlesLabel_2.HorizontalAlignment = 'right';
+            app.NeedlesLabel_2.Position = [7 248 80 22];
+            app.NeedlesLabel_2.Text = 'Needles';
+
+            % Create NeedleColourPicker
+            app.NeedleColourPicker = uicolorpicker(app.LeftPanel);
+            app.NeedleColourPicker.Value = [0 0 1];
+            app.NeedleColourPicker.Position = [101 248 100 22];
+
+            % Create IntersectingLabel
+            app.IntersectingLabel = uilabel(app.LeftPanel);
+            app.IntersectingLabel.HorizontalAlignment = 'right';
+            app.IntersectingLabel.Position = [7 227 80 22];
+            app.IntersectingLabel.Text = 'Intersecting';
+
+            % Create IntersectingNeedleColourPicker
+            app.IntersectingNeedleColourPicker = uicolorpicker(app.LeftPanel);
+            app.IntersectingNeedleColourPicker.Position = [101 227 100 22];
+
+            % Create SelectionLabel
+            app.SelectionLabel = uilabel(app.LeftPanel);
+            app.SelectionLabel.FontWeight = 'bold';
+            app.SelectionLabel.Position = [7 206 58 22];
+            app.SelectionLabel.Text = 'Selection';
+
+            % Create IntersectingLabel_2
+            app.IntersectingLabel_2 = uilabel(app.LeftPanel);
+            app.IntersectingLabel_2.HorizontalAlignment = 'right';
+            app.IntersectingLabel_2.Position = [6 185 80 22];
+            app.IntersectingLabel_2.Text = 'Selected';
+
+            % Create SelectedColourPicker
+            app.SelectedColourPicker = uicolorpicker(app.LeftPanel);
+            app.SelectedColourPicker.Value = [1 1 0];
+            app.SelectedColourPicker.Position = [100 185 100 22];
+
+            % Create CountEditField_2Label_2
+            app.CountEditField_2Label_2 = uilabel(app.LeftPanel);
+            app.CountEditField_2Label_2.HorizontalAlignment = 'right';
+            app.CountEditField_2Label_2.Position = [50 143 37 22];
+            app.CountEditField_2Label_2.Text = 'Count';
+
+            % Create SelectionCountEditField
+            app.SelectionCountEditField = uieditfield(app.LeftPanel, 'numeric');
+            app.SelectionCountEditField.Limits = [0 1000];
+            app.SelectionCountEditField.Position = [101 143 100 22];
+            app.SelectionCountEditField.Value = 3;
+
+            % Create IntersectingLabel_3
+            app.IntersectingLabel_3 = uilabel(app.LeftPanel);
+            app.IntersectingLabel_3.HorizontalAlignment = 'right';
+            app.IntersectingLabel_3.Position = [7 165 80 22];
+            app.IntersectingLabel_3.Text = 'Similar';
+
+            % Create SimilarColourPicker
+            app.SimilarColourPicker = uicolorpicker(app.LeftPanel);
+            app.SimilarColourPicker.Value = [0 1 0];
+            app.SimilarColourPicker.Position = [100 165 100 22];
+
+            % Create RightPanel
+            app.RightPanel = uipanel(app.GridLayout);
+            app.RightPanel.Layout.Row = 1;
+            app.RightPanel.Layout.Column = 2;
+
+            % Create UIAxes
+            app.UIAxes = uiaxes(app.RightPanel);
+            title(app.UIAxes, 'Buffon''s Needle Simulation')
+            xlabel(app.UIAxes, 'X')
+            ylabel(app.UIAxes, 'Y')
+            zlabel(app.UIAxes, 'Z')
+            app.UIAxes.Position = [3 2 417 478];
+
+            % Show the figure after all components are created
+            app.UIFigure.Visible = 'on';
+        end
+    end
+
+    % App creation and deletion
+    methods (Access = public)
+
+        % Construct app
+        function app = app1
+
+            % Create UIFigure and components
+            createComponents(app)
+
+            % Register the app with App Designer
+            registerApp(app, app.UIFigure)
+
+            if nargout == 0
+                clear app
+            end
+        end
+
+        % Code that executes before app deletion
+        function delete(app)
+
+            % Delete UIFigure when app is deleted
+            delete(app.UIFigure)
+        end
+    end
+end]]></w:t></w:r></w:p></w:body></w:document>
