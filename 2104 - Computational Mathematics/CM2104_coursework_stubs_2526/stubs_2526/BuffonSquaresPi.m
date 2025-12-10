@@ -13,17 +13,36 @@
 % nargin and nargout to  ensure  the  function  works  correctly  outside
 % the GUI with the input and output combinations specified above.
 
-function [p,crossings] = BuffonSquaresPi(width,length,throws)
+function [p, crossings, centreX, centreY, angle, crossing_mask] = BuffonSquaresPi(width, length, throws, planks, plank_length)
+arguments
+    width (1,1) {mustBePositive}
+    length (1,1) {mustBePositive}
+    throws (1,1) {mustBePositive}
+    planks (1,1) {mustBePositive} = 2
+    plank_length (1,1) {mustBePositive} = 10
+end
+arguments (Output)
+    p (1,1) double
+    crossings (1,1) uint32
+    centreX (1,:) double
+    centreY (1,:) double
+    angle (1,:) double
+    crossing_mask (1,:) logical
+end
+
 if nargin < 3
     error('BuffonSquaresPi requires width, length, and throws.');
 end
 
-if ~(isnumeric(width) && isnumeric(length) && isnumeric(throws)) || width <= 0 || length <= 0 || throws <= 0
-    error('width, length and throws must be positive numbers.');
-end
+total_width = planks * width;
+centreX = total_width * rand(throws, 1);
+centreY = plank_length * rand(throws, 1);
+angle = pi * rand(throws, 1);
 
 crossings = 0;
-halfL = length/2;
+crossing_mask = false(throws, 1);
+
+halfL = length / 2;
 
 corners = halfL * [
     -1, -1;
@@ -39,25 +58,29 @@ edges = [1 2; 2 3; 3 4; 4 1];
 R = @(theta) [cos(theta), -sin(theta); sin(theta), cos(theta)];
 
 for i = 1:throws
-    centreX = width * rand();
-    centreY = width * rand();
-    theta = pi*rand();
+    rotated = (R(angle(i)) * corners')';
 
-    rotated = (R(theta) * corners')';
-
-    pts = rotated + [centreX, centreY];
+    pts = rotated + [centreX(i), centreY(i)];
     x = pts(:,1);
-    idx = floor(x/width);
-    crossings = crossings + sum( ...
-        idx(edges(:,1)) ~= idx(edges(:,2)) ...
-    );
+
+    squareCrossed = false;
+
+    for e = 1:size(edges,1)
+        idx1 = floor(x(edges(e,1))/width);
+        idx2 = floor(x(edges(e,2))/width);
+        if idx1 ~= idx2
+            crossings = crossings + 1;
+            squareCrossed = true;
+        end
+    end
+    crossing_mask(i) = squareCrossed;
 end
 
-totalNeedles = throws * 4;
+totalEdges = throws * 4;
 if crossings == 0
     p = NaN;
 else
-    p = (2 * length * totalNeedles) / (crossings * width);
+    p = (2 * length * totalEdges) / (crossings * width);
 end
 
 if nargout < 1

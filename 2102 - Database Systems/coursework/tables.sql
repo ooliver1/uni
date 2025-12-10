@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS service_stop (
 	departure CHAR(5),
 	pass CHAR(5),
 	PRIMARY KEY (service_uid, position),
-	FOREIGN KEY (service_uid) REFERENCES service(uid)
+	FOREIGN KEY (service_uid) REFERENCES service(uid) ON DELETE CASCADE
 	FOREIGN KEY (tiploc_code) REFERENCES location(tiploc_code)
 );
 
