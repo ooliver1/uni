@@ -1,27 +1,42 @@
-CREATE TRIGGER service_immutable
+-- Both commit if not rolled back.
+CREATE TRIGGER service_update_immutable
 BEFORE UPDATE ON service
 BEGIN
-  SELECT
-	substr(CURRENT_DATE,3,2) || substr(CURRENT_DATE,6,2) || substr(CURRENT_DATE,9,2) AS yymmdd,
-    CASE WHEN OLD.valid_until > yymmdd
-	  CASE 
-	    WHEN NEW.valid_until IS NOT NULL AND NEW.valid_until < OLD.valid_until
-		  RAISE(ROLLBACK, "Cannot shorten validity of a service.")
-		WHEN NEW.valid_from IS NOT NULL AND NEW.valid_from > OLD.valid_from
-		  RAISE(ROLLBACK, "Cannot delay start validity of a service.")
-		WHEN NEW.operator IS NOT NULL
-		  RAISE(ROLLBACK, "Cannot change operator of a service.")
-		WHEN NEW.days_run IS NOT NULL
-		  RAISE(ROLLBACK, "Cannot change valid days of an entry.")
+    -- Only enforce immutability for services still valid in the future
+    SELECT CASE
+        WHEN OLD.valid_until > strftime('%y%m%d','now')
+             AND NEW.valid_until IS NOT NULL
+             AND NEW.valid_until < OLD.valid_until
+        THEN RAISE(ROLLBACK, 'Cannot shorten validity of a service.')
+    END;
+
+    SELECT CASE
+        WHEN OLD.valid_until > strftime('%y%m%d','now')
+             AND NEW.valid_from IS NOT NULL
+             AND NEW.valid_from > OLD.valid_from
+        THEN RAISE(ROLLBACK, 'Cannot delay start validity of a service.')
+    END;
+
+    SELECT CASE
+        WHEN OLD.valid_until > strftime('%y%m%d','now')
+             AND NEW.operator IS NOT NULL
+        THEN RAISE(ROLLBACK, 'Cannot change operator of a service.')
+    END;
+
+    SELECT CASE
+        WHEN OLD.valid_until > strftime('%y%m%d','now')
+             AND NEW.days_run IS NOT NULL
+        THEN RAISE(ROLLBACK, 'Cannot change valid days of an entry.')
+    END;
 END;
 
-CREATE TRIGGER service_stop_immutable
-BEFORE UPDATE ON service_stop
-WHEN (
-  NEW.arrival != OLD.arrival
-  OR NEW.departure != OLD.departure
-  OR NEW.tiploc_code != OLD.tiploc_code
-)
+CREATE TRIGGER service_delete_immutable
+BEFORE DELETE ON service
 BEGIN
-	RAISE(ROLLBACK, "Cannot modify public timetable stops.")
+	-- Cannot delete services currently valid
+	SELECT CASE
+		WHEN OLD.valid_until > strftime('%y%m%d','now')
+		AND OLD.valid_from < strftime('%y%m%d','now')
+		THEN RAISE(ROLLBACK, 'Cannot delete a service that is still valid in the future.')
+	END;
 END;
