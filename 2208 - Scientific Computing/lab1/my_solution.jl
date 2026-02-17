@@ -99,4 +99,3 @@ function exercise_1_3()
     println("  Verification: $(abs(real(z2 * z2_conj) - z2_mod^2) < 1e-10)")
 end
 
-exercise_1_3()
