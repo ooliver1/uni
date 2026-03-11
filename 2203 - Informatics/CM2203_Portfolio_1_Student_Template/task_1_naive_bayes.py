@@ -53,27 +53,33 @@ class NaiveBayes:
     #                   the chosen class is the one that appears earlier alphabetically.
     def predict(self, testing_data: pd.DataFrame) -> pd.DataFrame:
         classified_data = testing_data.copy()
-        probabilities = {}
-        for class_value in self.class_info[1]:
-            # P(c|A1,A2,...) = P(c) * P(A1|c) * P(A2|c) * ...
-            probabilities[class_value] = self.retrieve_class_probability(class_value)
-            for attr in self.feature_info.keys():
-                attr_value = testing_data[attr].values[0]
-                probabilities[class_value] *= self.retrieve_conditional_probability(class_value, attr, attr_value)
+        predicted_classes = []
 
-        # Choose the class with the highest probability
-        # Compare their value along with the class name, to handle if they are equal.
-        # If they are equal then take the first one alphabetically.
-        predicted_class = (None, 0)
-        for class_value, probability in probabilities.items():
-            if (
-                predicted_class is None
-                or probability > predicted_class[1]
-                or (probability == predicted_class[1] and class_value < predicted_class[0])
-            ):
-                predicted_class = (class_value, probability)
+        for _, row in testing_data.iterrows():
+            probabilities = {}
+            for class_value in self.class_info[1]:
+                # P(c|A1,A2,...) = P(c) * P(A1|c) * P(A2|c) * ...
+                probabilities[class_value] = self.retrieve_class_probability(class_value)
+                for attr in self.feature_info.keys():
+                    attr_value = row[attr]
+                    probabilities[class_value] *= self.retrieve_conditional_probability(class_value, attr, attr_value)
 
-        classified_data["PredictedClass"] = predicted_class[0]
+            # Choose the class with the highest probability
+            # Compare their value along with the class name, to handle if they are equal.
+            # If they are equal then take the first one alphabetically.
+            predicted_class = (None, 0)
+            for class_value, probability in probabilities.items():
+                if (
+                    predicted_class == (None, 0)
+                    or probability > predicted_class[1]
+                    or (probability == predicted_class[1] and class_value < predicted_class[0])
+                ):
+                    predicted_class = (class_value, probability)
+
+            predicted_classes.append(predicted_class[0])
+
+        classified_data['PredictedClass'] = predicted_classes
+
         return classified_data
 
     # The function returns the probability of a given class value. You can assume

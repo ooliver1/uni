@@ -151,8 +151,8 @@ def cross_validate(nb: NaiveBayes, training_data: pd.DataFrame, f: int,
 
     for fold_num, train_data, test_data in folds:
         nb.train_model(train_data)
-        predicted_classes = nb.predict(test_data)
-        actual_classes = test_data['Class']
+        predicted_classes = nb.predict(test_data)['PredictedClass']
+        actual_classes = test_data[nb.class_info[0]]
         actual_class_list.append(actual_classes)
         predicted_class_list.append(predicted_classes)
 

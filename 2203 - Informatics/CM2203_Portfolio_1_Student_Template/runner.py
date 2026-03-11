@@ -7,7 +7,7 @@ from task_2_evaluation import evaluate_classification
 from task_3_cross_validation import cross_validate
 
 # We load the dataset. Change the path as you see fit.
-dataset_path = "../processed_cleveland_dataset.csv"
+dataset_path = "./processed_cleveland_dataset.csv"
 dataset = read_data(dataset_path)
 
 # That's the name of the class variable in this dataset
