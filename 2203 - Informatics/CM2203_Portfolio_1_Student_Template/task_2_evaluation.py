@@ -96,17 +96,28 @@ def compute_FNs(matrix: pd.DataFrame) -> dict[str, int]:
 # As output, they produce:
 # - binary precision/recall/f-measure - appropriate evaluation measure created using the binary approach.
 
+# handle div 0
 def compute_binary_precision(tp: int, fp: int, fn: int) -> float:
+    if tp + fp == 0:
+        return 0.0
+
     return tp / (tp + fp)
 
 
 def compute_binary_recall(tp: int, fp: int, fn: int) -> float:
+    if tp + fn == 0:
+        return 0.0
+
     return tp / (tp + fn)
 
 
 def compute_binary_f_measure(tp: int, fp: int, fn: int) -> float:
     precision = compute_binary_precision(tp, fp, fn)
     recall = compute_binary_recall(tp, fp, fn)
+
+    if precision + recall == 0:
+        return 0.0
+
     return 2 * (precision * recall) / (precision + recall)
 
 
@@ -176,7 +187,6 @@ def compute_weighted_precision(matrix: pd.DataFrame) -> float:
 
     class_weighting = matrix.sum()
     total_records = class_weighting.sum()
-    print(class_weighting)
 
     if total_records == 0:
         return 0.0
@@ -279,16 +289,17 @@ def evaluate_classification(actual_class: pd.Series, predicted_class: pd.Series,
                             confusion_func=confusion_matrix) \
         -> dict[str, float]:
     # Have fun with the computations!
-    macro_precision = -1.0
-    macro_recall = -1.0
-    macro_f_measure = -1.0
 
-    weighted_precision = -1.0
-    weighted_recall = -1.0
-    weighted_f_measure = -1.0
+    matrix = confusion_func(actual_class, predicted_class, class_values)
+    macro_precision = compute_macro_precision(matrix)
+    macro_recall = compute_macro_recall(matrix)
+    macro_f_measure = compute_macro_f_measure(matrix)
+    weighted_precision = compute_weighted_precision(matrix)
+    weighted_recall = compute_weighted_recall(matrix)
+    weighted_f_measure = compute_weighted_f_measure(matrix)
+    standard_accuracy = compute_standard_accuracy(matrix)
+    balanced_accuracy = compute_balanced_accuracy(matrix)
 
-    standard_accuracy = -1.0
-    balanced_accuracy = -1.0
     # once ready, we return the values
     return {'macro_precision': macro_precision, 'macro_recall': macro_recall, 'macro_f_measure': macro_f_measure,
             'weighted_precision': weighted_precision, 'weighted_recall': weighted_recall,

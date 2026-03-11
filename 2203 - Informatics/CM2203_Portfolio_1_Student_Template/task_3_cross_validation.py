@@ -18,9 +18,29 @@ from task_1_naive_bayes import *
 #                     same name whatever partition it is in. The column and row names in the partition must be the same
 #                     as in training_data.
 def partition_data(training_data: pd.DataFrame, f: int) -> list[pd.DataFrame]:
-
     partition_list = []
-    # Compute, compute, compute!
+
+    # "If f exceeds the size of the data, cap it at data size."
+    f = min(f, len(training_data))
+
+    partition_size = len(training_data) // f
+    remainder = len(training_data) % f
+    indices = training_data.index.tolist()
+
+    start_idx = 0
+    for i in range(f):
+        current_size = partition_size
+        # Distribute remainder.
+        if i < remainder:
+            current_size += 1
+
+        end_idx = start_idx + current_size
+
+        partition_indices = indices[start_idx:end_idx]
+        partition_list.append(training_data.loc[partition_indices])
+
+        start_idx = end_idx
+
     return partition_list
 
 
@@ -46,7 +66,12 @@ def arrange_data_for_cv(partition_list: list[pd.DataFrame], f: int) \
         print("Something went really wrong! Why is the number of partitions different from f??")
         return []
     folds = []
-    # Do your thing!
+
+    for i in range(f):
+        testing_data = partition_list[i]
+        training_data = pd.concat(partition_list[:i] + partition_list[i + 1:], ignore_index=False)
+        folds.append((i, training_data, testing_data))
+
     return folds
 
 
@@ -69,7 +94,22 @@ def evaluate_results(actual_class_list: list[pd.Series], predicted_class_list: l
                'avg_weighted_precision': 0.0, 'avg_weighted_recall': 0.0,
                'avg_weighted_f_measure': 0.0, 'avg_standard_accuracy': 0.0,
                'avg_balanced_accuracy': 0.0}
-    # Black magic time!
+
+    for actual, predicted in zip(actual_class_list, predicted_class_list):
+        measures = task_2_evaluation.evaluate_classification(actual, predicted, class_values)
+        results['avg_macro_precision'] += measures['macro_precision']
+        results['avg_macro_recall'] += measures['macro_recall']
+        results['avg_macro_f_measure'] += measures['macro_f_measure']
+        results['avg_weighted_precision'] += measures['weighted_precision']
+        results['avg_weighted_recall'] += measures['weighted_recall']
+        results['avg_weighted_f_measure'] += measures['weighted_f_measure']
+        results['avg_standard_accuracy'] += measures['standard_accuracy']
+        results['avg_balanced_accuracy'] += measures['balanced_accuracy']
+
+    # Calculate averages
+    for key in results:
+        results[key] /= len(actual_class_list)
+
     return results
 
 
@@ -100,5 +140,33 @@ def cross_validate(nb: NaiveBayes, training_data: pd.DataFrame, f: int,
                    partition_func=partition_data, prep_func=arrange_data_for_cv, eval_func=evaluate_results) \
         -> tuple[pd.DataFrame, dict[str, float]]:
     output_dataset = None
+    evaluation_metrics = None
 
-    return output_dataset, {}
+    # Partition and fold
+    partitions = partition_func(training_data, f)
+    folds = prep_func(partitions, f)
+
+    actual_class_list = []
+    predicted_class_list = []
+
+    for fold_num, train_data, test_data in folds:
+        nb.train_model(train_data)
+        predicted_classes = nb.predict(test_data)
+        actual_classes = test_data['Class']
+        actual_class_list.append(actual_classes)
+        predicted_class_list.append(predicted_classes)
+
+        test_data = test_data.copy()
+        test_data['PredictedClass'] = predicted_classes
+        test_data['Fold'] = fold_num
+
+        if output_dataset is None:
+            output_dataset = test_data
+        else:
+            output_dataset = pd.concat([output_dataset, test_data], ignore_index=False)
+
+    assert output_dataset is not None, "Output dataset is None, are there any folds?"
+
+    evaluation_metrics = eval_func(actual_class_list, predicted_class_list, nb.class_info[1])
+
+    return output_dataset, evaluation_metrics

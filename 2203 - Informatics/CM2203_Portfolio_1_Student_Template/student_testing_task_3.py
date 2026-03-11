@@ -34,6 +34,8 @@ class Task_3_Testing(unittest.TestCase):
             for key in expected_output.keys():
                 res = res and round_equal(expected_output[key], output[key])
             res = res and expected_output.keys() == output.keys()
+            print(expected_output)
+            print(output)
 
             with self.subTest(msg="Checking if evaluating results with student function worked"):
                 self.assertEqual(res, True, "evaluate_results failed")
